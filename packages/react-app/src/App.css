@@ -1,3 +1,32 @@
 .App {
   text-align: center;
 }
+
+.dashboard-panel {
+  display: flex;
+}
+
+.dashboard-mint-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding: 20px;
+}
+
+.dashboard-nft-list-panel {
+
+}
+
+.dashboard-mint-button {
+  width: fit-content;
+  align-self: end;
+  background-color: #2caad9;
+  margin-bottom: 5px;
+  border-radius: 20px;
+}
+
+.dashboard-transfer-panel {
+  flex: 1 1 auto;
+  padding: 20px;
+  margin-top: 37px;
+}

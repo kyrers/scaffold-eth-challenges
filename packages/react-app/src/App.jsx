@@ -106,8 +106,8 @@ const scaffoldEthProvider = navigator.onLine
   : null;
 const poktMainnetProvider = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider(
-      "https://eth-mainnet.gateway.pokt.network/v1/lb/611156b4a585a20035148406",
-    )
+    "https://eth-mainnet.gateway.pokt.network/v1/lb/611156b4a585a20035148406",
+  )
   : null;
 const mainnetInfura = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID)
@@ -193,8 +193,8 @@ function App(props) {
     poktMainnetProvider && poktMainnetProvider._isProvider
       ? poktMainnetProvider
       : scaffoldEthProvider && scaffoldEthProvider._network
-      ? scaffoldEthProvider
-      : mainnetInfura;
+        ? scaffoldEthProvider
+        : mainnetInfura;
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
@@ -495,7 +495,7 @@ function App(props) {
           onClick={() => {
             faucetTx({
               to: address,
-              value: ethers.utils.parseEther("0.01"),
+              value: ethers.utils.parseEther("10"),
             });
             setFaucetClicked(true);
           }}
@@ -641,26 +641,27 @@ function App(props) {
   };
 
   const mintItem = async () => {
+    console.log("MINTING");
     // upload to ipfs
     const uploaded = await ipfs.add(JSON.stringify(json[count]));
     setCount(count + 1);
     console.log("Uploaded Hash: ", uploaded);
     const result = tx(
       writeContracts &&
-        writeContracts.YourCollectible &&
-        writeContracts.YourCollectible.mintItem(address, uploaded.path),
+      writeContracts.YourCollectible &&
+      writeContracts.YourCollectible.mintItem(address, uploaded.path),
       update => {
         console.log("📡 Transaction Update:", update);
         if (update && (update.status === "confirmed" || update.status === 1)) {
           console.log(" 🍾 Transaction " + update.hash + " finished!");
           console.log(
             " ⛽️ " +
-              update.gasUsed +
-              "/" +
-              (update.gasLimit || update.gas) +
-              " @ " +
-              parseFloat(update.gasPrice) / 1000000000 +
-              " gwei",
+            update.gasUsed +
+            "/" +
+            (update.gasLimit || update.gas) +
+            " @ " +
+            parseFloat(update.gasPrice) / 1000000000 +
+            " gwei",
           );
         }
       },
@@ -681,10 +682,10 @@ function App(props) {
               }}
               to="/"
             >
-              YourCollectibles
+              Dashboard
             </Link>
           </Menu.Item>
-          <Menu.Item key="/transfers">
+          /*<Menu.Item key="/transfers">
             <Link
               onClick={() => {
                 setRoute("/transfers");
@@ -723,78 +724,97 @@ function App(props) {
             >
               Debug Contracts
             </Link>
-          </Menu.Item>
+          </Menu.Item>*/
         </Menu>
         <Switch>
           <Route exact path="/">
-            <div style={{ width: 640, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              <Button
-                disabled={minting}
-                shape="round"
-                size="large"
-                onClick={() => {
-                  mintItem();
-                }}
-              >
-                MINT NFT
-              </Button>
-            </div>
-            <div style={{ width: 640, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              <List
-                bordered
-                dataSource={yourCollectibles}
-                renderItem={item => {
-                  const id = item.id.toNumber();
-                  return (
-                    <List.Item key={id + "_" + item.uri + "_" + item.owner}>
-                      <Card
-                        title={
-                          <div>
-                            <span style={{ fontSize: 16, marginRight: 8 }}>#{id}</span> {item.name}
-                          </div>
-                        }
-                      >
-                        <div>
-                          <img src={item.image} style={{ maxWidth: 150 }} />
-                        </div>
-                        <div>{item.description}</div>
-                      </Card>
+            <div className="dashboard-panel">
+              <div className="dashboard-mint-panel">
+                <div className="dashboard-mint-button">
+                  <Button
+                    disabled={minting}
+                    shape="round"
+                    size="medium"
+                    onClick={() => {
+                      mintItem();
+                    }}
+                  >
+                    MINT NFT
+                  </Button>
+                </div>
+                <div className="dashboard-nft-list-panel">
+                  <List
+                    bordered
+                    dataSource={yourCollectibles}
+                    renderItem={item => {
+                      const id = item.id.toNumber();
+                      return (
+                        <List.Item key={id + "_" + item.uri + "_" + item.owner}>
+                          <Card
+                            title={
+                              <div>
+                                <span style={{ fontSize: 16, marginRight: 8 }}>#{id}</span> {item.name}
+                              </div>
+                            }
+                          >
+                            <div>
+                              <img src={item.image} style={{ maxWidth: 150 }} />
+                            </div>
+                            <div>{item.description}</div>
+                          </Card>
 
-                      <div>
-                        owner:{" "}
-                        <Address
-                          address={item.owner}
-                          ensProvider={mainnetProvider}
-                          blockExplorer={blockExplorer}
-                          fontSize={16}
-                        />
-                        <AddressInput
-                          ensProvider={mainnetProvider}
-                          placeholder="transfer to address"
-                          value={transferToAddresses[id]}
-                          onChange={newValue => {
-                            const update = {};
-                            update[id] = newValue;
-                            setTransferToAddresses({ ...transferToAddresses, ...update });
-                          }}
-                        />
-                        <Button
-                          onClick={() => {
-                            console.log("writeContracts", writeContracts);
-                            tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[id], id));
-                          }}
-                        >
-                          Transfer
-                        </Button>
-                      </div>
-                    </List.Item>
-                  );
-                }}
-              />
+                          <div>
+                            owner:{" "}
+                            <Address
+                              address={item.owner}
+                              ensProvider={mainnetProvider}
+                              blockExplorer={blockExplorer}
+                              fontSize={16}
+                            />
+                            <AddressInput
+                              ensProvider={mainnetProvider}
+                              placeholder="transfer to address"
+                              value={transferToAddresses[id]}
+                              onChange={newValue => {
+                                const update = {};
+                                update[id] = newValue;
+                                setTransferToAddresses({ ...transferToAddresses, ...update });
+                              }}
+                            />
+                            <Button
+                              onClick={() => {
+                                console.log("writeContracts", writeContracts);
+                                tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[id], id));
+                              }}
+                            >
+                              Transfer
+                            </Button>
+                          </div>
+                        </List.Item>
+                      );
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="dashboard-transfer-panel">
+                <List
+                  bordered
+                  dataSource={transferEvents}
+                  renderItem={item => {
+                    return (
+                      <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item.args[2].toNumber()}>
+                        <span style={{ fontSize: 16, marginRight: 8 }}>#{item.args[2].toNumber()}</span>
+                        <Address address={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> =&gt;
+                        <Address address={item.args[1]} ensProvider={mainnetProvider} fontSize={16} />
+                      </List.Item>
+                    );
+                  }}
+                />
+              </div>
             </div>
           </Route>
 
-          <Route path="/transfers">
+          /*<Route path="/transfers">
             <div style={{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               <List
                 bordered
@@ -810,7 +830,7 @@ function App(props) {
                 }}
               />
             </div>
-          </Route>
+          </Route>*/
 
           <Route path="/ipfsup">
             <div style={{ paddingTop: 32, width: 740, margin: "auto", textAlign: "left" }}>
@@ -956,7 +976,7 @@ function App(props) {
           </Col>
         </Row>
       </div>
-    </div>
+    </div >
   );
 }
 
