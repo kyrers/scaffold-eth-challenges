@@ -739,7 +739,7 @@ function App(props) {
                       mintItem();
                     }}
                   >
-                    MINT NFT
+                    Mint NFT
                   </Button>
                 </div>
                 <div className="dashboard-nft-list-panel">
@@ -749,7 +749,7 @@ function App(props) {
                     renderItem={item => {
                       const id = item.id.toNumber();
                       return (
-                        <List.Item key={id + "_" + item.uri + "_" + item.owner}>
+                        <List.Item className="dashboard-nft-list-item" key={id + "_" + item.uri + "_" + item.owner}>
                           <Card
                             title={
                               <div>
@@ -763,32 +763,38 @@ function App(props) {
                             <div>{item.description}</div>
                           </Card>
 
-                          <div>
-                            owner:{" "}
-                            <Address
-                              address={item.owner}
-                              ensProvider={mainnetProvider}
-                              blockExplorer={blockExplorer}
-                              fontSize={16}
-                            />
-                            <AddressInput
-                              ensProvider={mainnetProvider}
-                              placeholder="transfer to address"
-                              value={transferToAddresses[id]}
-                              onChange={newValue => {
-                                const update = {};
-                                update[id] = newValue;
-                                setTransferToAddresses({ ...transferToAddresses, ...update });
-                              }}
-                            />
-                            <Button
-                              onClick={() => {
-                                console.log("writeContracts", writeContracts);
-                                tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[id], id));
-                              }}
-                            >
-                              Transfer
-                            </Button>
+                          <div className="dashboard-nft-list-item-info">
+                            <div className="dashboard-nft-list-item-info-owner">
+                              <span className="font-weight-bold">Owner: {" "}</span>
+                              <Address
+                                address={item.owner}
+                                ensProvider={mainnetProvider}
+                                blockExplorer={blockExplorer}
+                                fontSize={16}
+                              />
+                            </div>
+
+                            <div className="dasboard-nft-list-item-info-transfer">
+                              <AddressInput
+                                ensProvider={mainnetProvider}
+                                placeholder="Transfer to address"
+                                value={transferToAddresses[id]}
+                                onChange={newValue => {
+                                  const update = {};
+                                  update[id] = newValue;
+                                  setTransferToAddresses({ ...transferToAddresses, ...update });
+                                }}
+                              />
+                              <Button
+                              className="background-color-button-default margin-top-5"
+                                onClick={() => {
+                                  console.log("writeContracts", writeContracts);
+                                  tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[id], id));
+                                }}
+                              >
+                                Transfer
+                              </Button>
+                            </div>
                           </div>
                         </List.Item>
                       );

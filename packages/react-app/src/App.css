@@ -2,6 +2,7 @@
   text-align: center;
 }
 
+/*Component Specific*/
 .dashboard-panel {
   display: flex;
 }
@@ -13,8 +14,28 @@
   padding: 20px;
 }
 
+.dashboard-mint-button {
+  width: fit-content;
+  align-self: end;
+  background-color: #2caad9;
+  margin-bottom: 5px;
+  border-radius: 20px;
+}
+
 .dashboard-nft-list-panel {
 
+}
+
+.dashboard-nft-list-item {
+  justify-content: space-around !important;
+}
+
+.dashboard-nft-list-item-info {
+  padding: 5px;
+}
+
+.dashboard-nft-list-item-info-owner {
+  margin-bottom: 5px;
 }
 
 .dashboard-mint-button {
@@ -29,4 +50,17 @@
   flex: 1 1 auto;
   padding: 20px;
   margin-top: 37px;
+}
+
+/*General*/
+.font-weight-bold {
+  font-weight: bold;
+}
+
+.background-color-button-default {
+  background-color: #2caad9 !important;
+}
+
+.margin-top-5 {
+  margin-top: 5px;
 }
