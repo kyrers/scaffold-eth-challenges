@@ -3,6 +3,17 @@
 }
 
 /*Component Specific*/
+::-webkit-scrollbar {
+  background: gray;
+  width: 10px;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: darkgray;
+  border-radius: 5px;
+}
+
 .dashboard-panel {
   display: flex;
 }
@@ -23,7 +34,8 @@
 }
 
 .dashboard-nft-list-panel {
-
+  overflow-y: auto;
+  max-height: 65vh;
 }
 
 .dashboard-nft-list-item {
@@ -50,6 +62,11 @@
   flex: 1 1 auto;
   padding: 20px;
   margin-top: 37px;
+}
+
+.dashboard-transfer-list {
+  overflow-y: auto;
+  max-height: 65vh;
 }
 
 /*General*/

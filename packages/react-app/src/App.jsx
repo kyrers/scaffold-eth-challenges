@@ -786,7 +786,7 @@ function App(props) {
                                 }}
                               />
                               <Button
-                              className="background-color-button-default margin-top-5"
+                                className="background-color-button-default margin-top-5"
                                 onClick={() => {
                                   console.log("writeContracts", writeContracts);
                                   tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[id], id));
@@ -803,19 +803,28 @@ function App(props) {
                 </div>
               </div>
               <div className="dashboard-transfer-panel">
-                <List
-                  bordered
-                  dataSource={transferEvents}
-                  renderItem={item => {
-                    return (
-                      <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item.args[2].toNumber()}>
-                        <span style={{ fontSize: 16, marginRight: 8 }}>#{item.args[2].toNumber()}</span>
-                        <Address address={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> =&gt;
-                        <Address address={item.args[1]} ensProvider={mainnetProvider} fontSize={16} />
-                      </List.Item>
-                    );
-                  }}
-                />
+                <div className="dashboard-transfer-list">
+                  <List
+                    bordered
+                    dataSource={transferEvents}
+                    renderItem={item => {
+                      let nft = yourCollectibles.find(nft => nft.id.toNumber() === item.args[2].toNumber())
+
+                      if (yourCollectibles.length <= 0) {
+                        return null;
+                      }
+
+                      return (
+                        <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item.args[2].toNumber()}>
+                          <span style={{ fontSize: 16, marginRight: 8, fontWeight: "bold" }}>Transfered {nft !== undefined ? nft.name : "Dafuq"} (#{item.args[2].toNumber()}) from</span>
+                          <Address address={item.args[0]} ensProvider={mainnetProvider} fontSize={16} />
+                          <span style={{ fontSize: 16, marginRight: 8, fontWeight: "bold" }}>to:</span>
+                          <Address address={item.args[1]} ensProvider={mainnetProvider} fontSize={16} />
+                        </List.Item>
+                      );
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </Route>
