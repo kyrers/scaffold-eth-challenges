@@ -516,6 +516,7 @@ function App(props) {
   const [minting, setMinting] = useState(false);
   const [count, setCount] = useState(1);
   const [displayTransferPopup, setDisplayTransferPopup] = useState(false);
+  const [displayUploadToIPFSPopup, setDisplayUploadToIPFSPopup] = useState(false);
   const [selectedNftId, setSelectedNftId] = useState(0);
 
   // the json for the nfts
@@ -676,6 +677,18 @@ function App(props) {
     tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[selectedNftId], selectedNftId));
   };
 
+  const uploadToIPFS = async () => {
+    console.log("UPLOADING...", yourJSON);
+    setSending(true);
+    setIpfsHash();
+    const result = await ipfs.add(JSON.stringify(yourJSON)); // addToIPFS(JSON.stringify(yourJSON))
+    if (result && result.path) {
+      setIpfsHash(result.path);
+    }
+    setSending(false);
+    console.log("RESULT:", result);
+  }
+
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
@@ -728,7 +741,7 @@ function App(props) {
           <Route exact path="/">
             <div className="dashboard-panel">
               <div className="dashboard-mint-panel">
-                <Modal visible={displayTransferPopup} title="Transfer NFT" onOk={transferNFT} onCancel={() => setDisplayTransferPopup(!displayTransferPopup)} >
+                <Modal className="nft-actions-modal" visible={displayTransferPopup} title="Transfer NFT" onOk={transferNFT} onCancel={() => setDisplayTransferPopup(!displayTransferPopup)} >
                   <AddressInput
                     ensProvider={mainnetProvider}
                     placeholder="Transfer to address"
@@ -739,6 +752,26 @@ function App(props) {
                       setTransferToAddresses({ ...transferToAddresses, ...update });
                     }}
                   />
+                </Modal>
+
+                <Modal className="nft-actions-modal" visible={displayUploadToIPFSPopup} title="Upload to IPFS" onOk={uploadToIPFS} onCancel={() => setDisplayUploadToIPFSPopup(!displayUploadToIPFSPopup)}>
+                  <div style={{ paddingTop: 32, width: 740, margin: "auto", textAlign: "left" }}>
+                    <ReactJson
+                      style={{ padding: 8 }}
+                      src={yourJSON}
+                      theme="pop"
+                      enableClipboard={false}
+                      onEdit={(edit, a) => {
+                        setYourJSON(edit.updated_src);
+                      }}
+                      onAdd={(add, a) => {
+                        setYourJSON(add.updated_src);
+                      }}
+                      onDelete={(del, a) => {
+                        setYourJSON(del.updated_src);
+                      }}
+                    />
+                  </div>
                 </Modal>
 
                 <div className="dashboard-mint-button">
@@ -815,15 +848,9 @@ function App(props) {
                                 size="medium"
                                 type="primary"
                                 onClick={async () => {
-                                  console.log("UPLOADING...", yourJSON);
-                                  setSending(true);
-                                  setIpfsHash();
-                                  const result = await ipfs.add(JSON.stringify(yourJSON)); // addToIPFS(JSON.stringify(yourJSON))
-                                  if (result && result.path) {
-                                    setIpfsHash(result.path);
-                                  }
-                                  setSending(false);
-                                  console.log("RESULT:", result);
+                                  setSelectedNftId(id);
+                                  setYourJSON(json[selectedNftId + 1]);
+                                  setDisplayUploadToIPFSPopup(!displayUploadToIPFSPopup);
                                 }}
                               >
                                 Upload to IPFS
@@ -863,7 +890,7 @@ function App(props) {
             </div>
           </Route>
 
-          <Route path="/ipfsup">
+          {/*<Route path="/ipfsup">
             <div style={{ paddingTop: 32, width: 740, margin: "auto", textAlign: "left" }}>
               <ReactJson
                 style={{ padding: 8 }}
@@ -904,7 +931,7 @@ function App(props) {
             </Button>
 
             <div style={{ padding: 16, paddingBottom: 150 }}>{ipfsHash}</div>
-          </Route>
+          </Route>*/}
           <Route path="/ipfsdown">
             <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
               <Input

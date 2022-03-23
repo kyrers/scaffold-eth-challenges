@@ -74,6 +74,10 @@
   max-height: 65vh;
 }
 
+.nft-actions-modal .ant-modal-content {
+  width: fit-content;
+}
+
 /*General*/
 .font-weight-bold {
   font-weight: bold;
