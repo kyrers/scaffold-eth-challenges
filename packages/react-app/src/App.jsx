@@ -1,6 +1,6 @@
 import Portis from "@portis/web3";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { Alert, Button, Card, Col, Input, List, Menu, Row } from "antd";
+import { Alert, Button, Card, Col, Input, List, Menu, Modal, Row } from "antd";
 import "antd/dist/antd.css";
 import Authereum from "authereum";
 import {
@@ -515,6 +515,8 @@ function App(props) {
   const [transferToAddresses, setTransferToAddresses] = useState({});
   const [minting, setMinting] = useState(false);
   const [count, setCount] = useState(1);
+  const [displayTransferPopup, setDisplayTransferPopup] = useState(false);
+  const [selectedNftId, setSelectedNftId] = useState(0);
 
   // the json for the nfts
   const json = {
@@ -668,6 +670,12 @@ function App(props) {
     );
   };
 
+  const transferNFT = async () => {
+    console.log("writeContracts", writeContracts);
+    setDisplayTransferPopup(!displayTransferPopup);
+    tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[selectedNftId], selectedNftId));
+  };
+
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
@@ -683,16 +691,6 @@ function App(props) {
               to="/"
             >
               Dashboard
-            </Link>
-          </Menu.Item>
-          /*<Menu.Item key="/transfers">
-            <Link
-              onClick={() => {
-                setRoute("/transfers");
-              }}
-              to="/transfers"
-            >
-              Transfers
             </Link>
           </Menu.Item>
           <Menu.Item key="/ipfsup">
@@ -724,12 +722,25 @@ function App(props) {
             >
               Debug Contracts
             </Link>
-          </Menu.Item>*/
+          </Menu.Item>
         </Menu>
         <Switch>
           <Route exact path="/">
             <div className="dashboard-panel">
               <div className="dashboard-mint-panel">
+                <Modal visible={displayTransferPopup} title="Transfer NFT" onOk={transferNFT} onCancel={() => setDisplayTransferPopup(!displayTransferPopup)} >
+                  <AddressInput
+                    ensProvider={mainnetProvider}
+                    placeholder="Transfer to address"
+                    value={transferToAddresses[selectedNftId]}
+                    onChange={newValue => {
+                      const update = {};
+                      update[selectedNftId] = newValue;
+                      setTransferToAddresses({ ...transferToAddresses, ...update });
+                    }}
+                  />
+                </Modal>
+
                 <div className="dashboard-mint-button">
                   <Button
                     disabled={minting}
@@ -774,25 +785,48 @@ function App(props) {
                               />
                             </div>
 
-                            <div className="dasboard-nft-list-item-info-transfer">
-                              <AddressInput
-                                ensProvider={mainnetProvider}
-                                placeholder="Transfer to address"
-                                value={transferToAddresses[id]}
-                                onChange={newValue => {
-                                  const update = {};
-                                  update[id] = newValue;
-                                  setTransferToAddresses({ ...transferToAddresses, ...update });
-                                }}
-                              />
+                            <div className="dashboard-nft-list-item-actions">
+
+                              {/*<div className="dasboard-nft-list-item-info-transfer">
+                                <AddressInput
+                                  ensProvider={mainnetProvider}
+                                  placeholder="Transfer to address"
+                                  value={transferToAddresses[id]}
+                                  onChange={newValue => {
+                                    const update = {};
+                                    update[id] = newValue;
+                                    setTransferToAddresses({ ...transferToAddresses, ...update });
+                                  }}
+                                />*/}
                               <Button
-                                className="background-color-button-default margin-top-5"
+                                className="background-color-button-default margin-5"
                                 onClick={() => {
-                                  console.log("writeContracts", writeContracts);
-                                  tx(writeContracts.YourCollectible.transferFrom(address, transferToAddresses[id], id));
+                                  setDisplayTransferPopup(!displayTransferPopup);
+                                  setSelectedNftId(id);
                                 }}
                               >
                                 Transfer
+                              </Button>
+                              {/*</div>*/}
+
+                              <Button
+                                className="background-color-button-default margin-5"
+                                loading={sending}
+                                size="medium"
+                                type="primary"
+                                onClick={async () => {
+                                  console.log("UPLOADING...", yourJSON);
+                                  setSending(true);
+                                  setIpfsHash();
+                                  const result = await ipfs.add(JSON.stringify(yourJSON)); // addToIPFS(JSON.stringify(yourJSON))
+                                  if (result && result.path) {
+                                    setIpfsHash(result.path);
+                                  }
+                                  setSending(false);
+                                  console.log("RESULT:", result);
+                                }}
+                              >
+                                Upload to IPFS
                               </Button>
                             </div>
                           </div>
@@ -816,7 +850,7 @@ function App(props) {
 
                       return (
                         <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item.args[2].toNumber()}>
-                          <span style={{ fontSize: 16, marginRight: 8, fontWeight: "bold" }}>Transfered {nft !== undefined ? nft.name : "Dafuq"} (#{item.args[2].toNumber()}) from</span>
+                          <span style={{ fontSize: 16, marginRight: 8, fontWeight: "bold" }}>Transfered {nft !== undefined ? nft.name : ""} (#{item.args[2].toNumber()}) from</span>
                           <Address address={item.args[0]} ensProvider={mainnetProvider} fontSize={16} />
                           <span style={{ fontSize: 16, marginRight: 8, fontWeight: "bold" }}>to:</span>
                           <Address address={item.args[1]} ensProvider={mainnetProvider} fontSize={16} />
@@ -828,24 +862,6 @@ function App(props) {
               </div>
             </div>
           </Route>
-
-          /*<Route path="/transfers">
-            <div style={{ width: 600, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              <List
-                bordered
-                dataSource={transferEvents}
-                renderItem={item => {
-                  return (
-                    <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item.args[2].toNumber()}>
-                      <span style={{ fontSize: 16, marginRight: 8 }}>#{item.args[2].toNumber()}</span>
-                      <Address address={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> =&gt;
-                      <Address address={item.args[1]} ensProvider={mainnetProvider} fontSize={16} />
-                    </List.Item>
-                  );
-                }}
-              />
-            </div>
-          </Route>*/
 
           <Route path="/ipfsup">
             <div style={{ paddingTop: 32, width: 740, margin: "auto", textAlign: "left" }}>

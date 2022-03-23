@@ -58,6 +58,11 @@
   border-radius: 20px;
 }
 
+.dashboard-nft-list-item-actions {
+  display: flex;
+  flex-direction: row;
+}
+
 .dashboard-transfer-panel {
   flex: 1 1 auto;
   padding: 20px;
@@ -78,6 +83,6 @@
   background-color: #2caad9 !important;
 }
 
-.margin-top-5 {
-  margin-top: 5px;
+.margin-5 {
+  margin: 5px;
 }
