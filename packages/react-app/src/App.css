@@ -40,6 +40,7 @@
 
 .dashboard-nft-list-item {
   justify-content: space-around !important;
+  align-items: flex-start !important;
 }
 
 .dashboard-nft-list-item-info {
@@ -48,6 +49,7 @@
 
 .dashboard-nft-list-item-info-owner {
   margin-bottom: 5px;
+  text-align: start;
 }
 
 .dashboard-mint-button {
@@ -89,4 +91,8 @@
 
 .margin-5 {
   margin: 5px;
+}
+
+.margin-left-0 {
+  margin-left: 0px !important;
 }

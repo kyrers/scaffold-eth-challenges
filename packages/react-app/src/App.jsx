@@ -684,8 +684,11 @@ function App(props) {
     const result = await ipfs.add(JSON.stringify(yourJSON)); // addToIPFS(JSON.stringify(yourJSON))
     if (result && result.path) {
       setIpfsHash(result.path);
+      yourCollectibles.find(item => item.id.toNumber() === selectedNftId).tokenURI = result.path;
     }
     setSending(false);
+    setDisplayUploadToIPFSPopup(!displayUploadToIPFSPopup);
+
     console.log("RESULT:", result);
   }
 
@@ -809,13 +812,21 @@ function App(props) {
 
                           <div className="dashboard-nft-list-item-info">
                             <div className="dashboard-nft-list-item-info-owner">
-                              <span className="font-weight-bold">Owner: {" "}</span>
+                              <span className="font-weight-bold">OWNER</span>
+                              <br />
                               <Address
+                                size="long"
                                 address={item.owner}
                                 ensProvider={mainnetProvider}
                                 blockExplorer={blockExplorer}
                                 fontSize={16}
                               />
+                            </div>
+
+                            <div className="dashboard-nft-list-item-info-owner">
+                              <span className="font-weight-bold">IPFS HASH</span>
+                              <br />
+                              <span>{item.tokenURI !== undefined ? item.tokenURI : "Not uploaded yet. Try it."}</span>
                             </div>
 
                             <div className="dashboard-nft-list-item-actions">
@@ -832,7 +843,7 @@ function App(props) {
                                   }}
                                 />*/}
                               <Button
-                                className="background-color-button-default margin-5"
+                                className="background-color-button-default margin-5 margin-left-0"
                                 onClick={() => {
                                   setDisplayTransferPopup(!displayTransferPopup);
                                   setSelectedNftId(id);
@@ -843,13 +854,14 @@ function App(props) {
                               {/*</div>*/}
 
                               <Button
-                                className="background-color-button-default margin-5"
-                                loading={sending}
+                                key={id}
+                                className="background-color-button-default margin-5 margin-left-0"
+                                loading={sending && selectedNftId === id}
                                 size="medium"
                                 type="primary"
                                 onClick={async () => {
                                   setSelectedNftId(id);
-                                  setYourJSON(json[selectedNftId + 1]);
+                                  setYourJSON(json[id]);
                                   setDisplayUploadToIPFSPopup(!displayUploadToIPFSPopup);
                                 }}
                               >
@@ -879,7 +891,7 @@ function App(props) {
                         <List.Item key={item[0] + "_" + item[1] + "_" + item.blockNumber + "_" + item.args[2].toNumber()}>
                           <span style={{ fontSize: 16, marginRight: 8, fontWeight: "bold" }}>Transfered {nft !== undefined ? nft.name : ""} (#{item.args[2].toNumber()}) from</span>
                           <Address address={item.args[0]} ensProvider={mainnetProvider} fontSize={16} />
-                          <span style={{ fontSize: 16, marginRight: 8, fontWeight: "bold" }}>to:</span>
+                          <span style={{ fontSize: 16, marginRight: 8, fontWeight: "bold" }}>to</span>
                           <Address address={item.args[1]} ensProvider={mainnetProvider} fontSize={16} />
                         </List.Item>
                       );
