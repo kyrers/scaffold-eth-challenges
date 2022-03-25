@@ -23,14 +23,19 @@
   flex-direction: column;
   flex: 1 1 auto;
   padding: 20px;
+  max-width: 60%;
 }
 
-.dashboard-mint-button {
-  width: fit-content;
-  align-self: end;
-  background-color: #2caad9;
+.dashboard-mint-panel-buttons {
+  display: flex;
   margin-bottom: 5px;
-  border-radius: 20px;
+  justify-content: end;
+}
+
+.dashboard-mint-button, .dashboard-download-ipfs-button {
+  width: fit-content;
+  background-color: #2caad9 !important;
+  margin: 5px 0px 5px 5px;
 }
 
 .dashboard-nft-list-panel {
@@ -39,25 +44,18 @@
 }
 
 .dashboard-nft-list-item {
-  justify-content: space-around !important;
+  justify-content: unset !important;
   align-items: flex-start !important;
 }
 
 .dashboard-nft-list-item-info {
   padding: 5px;
+  margin-left: 20px;
 }
 
 .dashboard-nft-list-item-info-owner {
   margin-bottom: 5px;
   text-align: start;
-}
-
-.dashboard-mint-button {
-  width: fit-content;
-  align-self: end;
-  background-color: #2caad9;
-  margin-bottom: 5px;
-  border-radius: 20px;
 }
 
 .dashboard-nft-list-item-actions {
@@ -68,7 +66,8 @@
 .dashboard-transfer-panel {
   flex: 1 1 auto;
   padding: 20px;
-  margin-top: 37px;
+  margin-top: 47px;
+  max-width: 40%;
 }
 
 .dashboard-transfer-list {
@@ -80,13 +79,14 @@
   width: fit-content;
 }
 
+.default-nft-action-button {
+  background-color: #2caad9 !important;
+  margin: 5px 5px 5px 0px !important;
+}
+
 /*General*/
 .font-weight-bold {
   font-weight: bold;
-}
-
-.background-color-button-default {
-  background-color: #2caad9 !important;
 }
 
 .margin-5 {

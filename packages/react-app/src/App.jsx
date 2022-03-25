@@ -517,11 +517,13 @@ function App(props) {
   const [count, setCount] = useState(1);
   const [displayTransferPopup, setDisplayTransferPopup] = useState(false);
   const [displayUploadToIPFSPopup, setDisplayUploadToIPFSPopup] = useState(false);
+  const [displayDownloadFromIPFSPopup, setDisplayDownloadFromIPFSPopup] = useState(false);
   const [selectedNftId, setSelectedNftId] = useState(0);
+  const [downloadedNFT, setDownloadedNFT] = useState();
 
   // the json for the nfts
-  const json = {
-    1: {
+  const json = [
+    {
       description: "It's actually a bison?",
       external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
       image: "https://austingriffith.com/images/paintings/buffalo.jpg",
@@ -541,7 +543,7 @@ function App(props) {
         },
       ],
     },
-    2: {
+    {
       description: "What is it so worried about?",
       external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
       image: "https://austingriffith.com/images/paintings/zebra.jpg",
@@ -561,7 +563,7 @@ function App(props) {
         },
       ],
     },
-    3: {
+    {
       description: "What a horn!",
       external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
       image: "https://austingriffith.com/images/paintings/rhino.jpg",
@@ -581,7 +583,7 @@ function App(props) {
         },
       ],
     },
-    4: {
+    {
       description: "Is that an underbyte?",
       external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
       image: "https://austingriffith.com/images/paintings/fish.jpg",
@@ -601,7 +603,7 @@ function App(props) {
         },
       ],
     },
-    5: {
+    {
       description: "So delicate.",
       external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
       image: "https://austingriffith.com/images/paintings/flamingo.jpg",
@@ -621,7 +623,7 @@ function App(props) {
         },
       ],
     },
-    6: {
+    {
       description: "Raaaar!",
       external_url: "https://austingriffith.com/portfolio/paintings/", // <-- this can link to a page for the specific file too
       image: "https://austingriffith.com/images/paintings/godzilla.jpg",
@@ -641,7 +643,7 @@ function App(props) {
         },
       ],
     },
-  };
+  ];
 
   const mintItem = async () => {
     console.log("MINTING");
@@ -692,6 +694,30 @@ function App(props) {
     console.log("RESULT:", result);
   }
 
+  const downloadFromIPFS = async () => {
+    console.log("DOWNLOADING...", ipfsDownHash);
+    setDownloading(true);
+    setIpfsContent();
+    const result = await getFromIPFS(ipfsDownHash); // addToIPFS(JSON.stringify(yourJSON))
+    if (result && result.toString) {
+      console.log(result.toString())
+      let resultFormmated = result.toString().split(",");
+      console.log("RESULT FORMATTED", resultFormmated);
+      setDownloadedNFT({
+        description: resultFormmated[0].split(":")[1].replace("\"", ""),
+        external_url: resultFormmated[1].split(":")[1].replace("\"", ""),
+        image: resultFormmated[2].split(":")[1].replace("\"", "") + ":" + resultFormmated[2].split(":")[2].replace("\"", ""),
+        name: resultFormmated[3].split(":")[1].replace("\"", "").replace("\"", "")
+      });
+    }
+    setDownloading(false);
+  }
+
+  const closeDownloadFromIPFS = async () => {
+    setDisplayDownloadFromIPFSPopup(!displayDownloadFromIPFSPopup);
+    setDownloadedNFT(undefined);
+  }
+
   return (
     <div className="App">
       {/* ✏️ Edit the header and change the title to your project name */}
@@ -709,7 +735,7 @@ function App(props) {
               Dashboard
             </Link>
           </Menu.Item>
-          <Menu.Item key="/ipfsup">
+          {/*<Menu.Item key="/ipfsup">
             <Link
               onClick={() => {
                 setRoute("/ipfsup");
@@ -728,7 +754,7 @@ function App(props) {
             >
               IPFS Download
             </Link>
-          </Menu.Item>
+            </Menu.Item>*/}
           <Menu.Item key="/debugcontracts">
             <Link
               onClick={() => {
@@ -777,8 +803,38 @@ function App(props) {
                   </div>
                 </Modal>
 
-                <div className="dashboard-mint-button">
+                <Modal className="nft-actions-modal" visible={displayDownloadFromIPFSPopup} title="Upload to IPFS" onOk={downloadFromIPFS} onCancel={closeDownloadFromIPFS}>
+                  <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
+                    <Input
+                      value={ipfsDownHash}
+                      placeholder="IPFS hash (like QmadqNw8zkdrrwdtPFK1pLi8PPxmkQ4pDJXY8ozHtz6tZq)"
+                      onChange={e => {
+                        setIpfsDownHash(e.target.value);
+                      }}
+                    />
+                    {
+                      downloadedNFT !== undefined ?
+                        <Card
+                          title={
+                            <div>
+                              {downloadedNFT.name}
+                            </div>
+                          }
+                        >
+                          <div>
+                            <img src={downloadedNFT.image} style={{ maxWidth: 150 }} />
+                          </div>
+                          <div>{downloadedNFT.description}</div>
+                        </Card>
+                        :
+                        null
+                    }
+                  </div>
+                </Modal>
+
+                <div className="dashboard-mint-panel-buttons">
                   <Button
+                    className="dashboard-mint-button"
                     disabled={minting}
                     shape="round"
                     size="medium"
@@ -787,6 +843,17 @@ function App(props) {
                     }}
                   >
                     Mint NFT
+                  </Button>
+                  <Button
+                    className="dashboard-download-ipfs-button"
+                    disabled={minting}
+                    shape="round"
+                    size="medium"
+                    onClick={() => {
+                      setDisplayDownloadFromIPFSPopup(!displayDownloadFromIPFSPopup);
+                    }}
+                  >
+                    Download from IPFS
                   </Button>
                 </div>
                 <div className="dashboard-nft-list-panel">
@@ -843,7 +910,10 @@ function App(props) {
                                   }}
                                 />*/}
                               <Button
-                                className="background-color-button-default margin-5 margin-left-0"
+                                className="default-nft-action-button"
+                                size="medium"
+                                type="primary"
+                                shape="round"
                                 onClick={() => {
                                   setDisplayTransferPopup(!displayTransferPopup);
                                   setSelectedNftId(id);
@@ -855,13 +925,14 @@ function App(props) {
 
                               <Button
                                 key={id}
-                                className="background-color-button-default margin-5 margin-left-0"
+                                className="default-nft-action-button"
                                 loading={sending && selectedNftId === id}
                                 size="medium"
                                 type="primary"
+                                shape="round"
                                 onClick={async () => {
                                   setSelectedNftId(id);
-                                  setYourJSON(json[id]);
+                                  setYourJSON(json.find(j => j.name === item.name));
                                   setDisplayUploadToIPFSPopup(!displayUploadToIPFSPopup);
                                 }}
                               >
@@ -943,7 +1014,7 @@ function App(props) {
             </Button>
 
             <div style={{ padding: 16, paddingBottom: 150 }}>{ipfsHash}</div>
-          </Route>*/}
+          </Route>
           <Route path="/ipfsdown">
             <div style={{ paddingTop: 32, width: 740, margin: "auto" }}>
               <Input
@@ -975,7 +1046,7 @@ function App(props) {
             </Button>
 
             <pre style={{ padding: 16, width: 500, margin: "auto", paddingBottom: 150 }}>{ipfsContent}</pre>
-          </Route>
+          </Route>*/}
           <Route path="/debugcontracts">
             <Contract
               name="YourCollectible"
