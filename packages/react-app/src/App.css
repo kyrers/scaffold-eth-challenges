@@ -41,6 +41,8 @@
 .dashboard-nft-list-panel {
   overflow-y: auto;
   max-height: 65vh;
+  background: rgba(0,255,255,0.2);
+  border-radius: 20px;
 }
 
 .dashboard-nft-list-item {
@@ -66,8 +68,12 @@
 .dashboard-transfer-panel {
   flex: 1 1 auto;
   padding: 20px;
-  margin-top: 47px;
+  margin-top: 67px;
+  margin-right: 10px;
+  border-radius: 20px;
   max-width: 40%;
+  height: fit-content;
+  background: rgba(0,255,255,0.2);
 }
 
 .dashboard-transfer-list {
@@ -79,9 +85,23 @@
   width: fit-content;
 }
 
-.default-nft-action-button {
+.default-nft-action-button, .default-contract-action-button {
   background-color: #2caad9 !important;
   margin: 5px 5px 5px 0px !important;
+}
+
+.default-contract-action-button {
+  margin-left: -28px !important;
+  border-radius: 20px !important;
+}
+
+.contract-interaction-panel {
+  margin: auto !important;
+  width: 70vw !important;
+  height: 70vh;
+  overflow-y: auto;
+  background: rgba(0,255,255,0.2) !important;
+  border-radius: 20px !important;
 }
 
 /*General*/

@@ -762,7 +762,7 @@ function App(props) {
               }}
               to="/debugcontracts"
             >
-              Debug Contracts
+              Contract interaction
             </Link>
           </Menu.Item>
         </Menu>
@@ -814,18 +814,20 @@ function App(props) {
                     />
                     {
                       downloadedNFT !== undefined ?
-                        <Card
-                          title={
+                        <div className="dashboard-nft-list-item-info">
+                          <Card
+                            title={
+                              <div>
+                                {downloadedNFT.name}
+                              </div>
+                            }
+                          >
                             <div>
-                              {downloadedNFT.name}
+                              <img src={downloadedNFT.image} style={{ maxWidth: 150 }} />
                             </div>
-                          }
-                        >
-                          <div>
-                            <img src={downloadedNFT.image} style={{ maxWidth: 150 }} />
-                          </div>
-                          <div>{downloadedNFT.description}</div>
-                        </Card>
+                            <div>{downloadedNFT.description}</div>
+                          </Card>
+                        </div>
                         :
                         null
                     }

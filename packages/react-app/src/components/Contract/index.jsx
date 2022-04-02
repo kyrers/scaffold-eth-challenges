@@ -113,8 +113,10 @@ export default function Contract({
   });
 
   return (
-    <div style={{ margin: "auto", width: "70vw" }}>
+    <div >
+      <p>Many functions here could be exported to a Dashboard-like UI, however, they remain here to simulate a more bare-bone interaction with a deployed contract.</p>
       <Card
+        className="contract-interaction-panel"
         title={
           <div>
             {name}
