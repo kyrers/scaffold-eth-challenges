@@ -233,7 +233,7 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
       </div >
       :
       <div>
-        <Modal visible={isToDisplayResult} title="Transaction Result" onOk={() => setIsToDisplayResult(!isToDisplayResult)} onCancel={() => setIsToDisplayResult(!isToDisplayResult)}>
+        <Modal className="contract-interaction-result-modal" visible={isToDisplayResult} title="Transaction Result" onOk={() => setIsToDisplayResult(!isToDisplayResult)} onCancel={() => setIsToDisplayResult(!isToDisplayResult)}>
           {returnValue}
         </Modal>
       </div>
