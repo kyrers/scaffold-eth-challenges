@@ -5,12 +5,8 @@ import React from "react";
 
 export default function Header() {
   return (
-    <a href="/" /*target="_blank" rel="noopener noreferrer"*/>
-      <PageHeader
-        title="🏗 scaffold-eth"
-        subTitle="forkable Ethereum dev stack focused on fast product iteration"
-        style={{ cursor: "pointer" }}
-      />
-    </a>
+    <a href="https://github.com/kyrers/scaffold-eth-challenges/tree/challenge-1-decentralized-staking" target="_blank" rel="noopener noreferrer">
+    <PageHeader title="Decentralized Staking App" subTitle="By kyrers. Forked from 🏗 scaffold-eth" style={{ cursor: "pointer" }} />
+  </a>
   );
 }
