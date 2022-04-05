@@ -14,15 +14,19 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   await deploy("Staker", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    args: [exampleExternalContract.address, 5],
+    args: [exampleExternalContract.address, 1],
     log: true,
   });
 
-  // Getting a previously deployed contract
-  // const Staker = await ethers.getContract(
-  //   "Staker",
-  //   deployer
-  // );
+  //Getting a previously deployed contract
+   const Staker = await ethers.getContract(
+     "Staker",
+     deployer
+  );
+
+  //Giving you ownership
+  console.log("---- Giving you ownership ----");
+  await Staker.transferOwnership("");
 
   // await YourContract.setPurpose("Hello");
 
