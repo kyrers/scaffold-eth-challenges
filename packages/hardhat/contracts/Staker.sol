@@ -66,7 +66,7 @@ contract Staker is Ownable {
   constructor(address _exampleExternalContractAddress, uint256 _minimumStackedAmount) isValidAmount(_minimumStackedAmount) {
     exampleExternalContract = ExampleExternalContract(_exampleExternalContractAddress);
     minimumStackedAmount = _minimumStackedAmount * 1 ether;
-    deadline = block.timestamp + 1 minutes;
+    deadline = block.timestamp + 3 minutes;
   }
 
 

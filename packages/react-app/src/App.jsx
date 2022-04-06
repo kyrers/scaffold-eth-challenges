@@ -6,6 +6,7 @@ import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import Web3Modal from "web3modal";
+import Countdown from "react-countdown";
 import "./App.css";
 import { Account, Address, Balance, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
@@ -68,8 +69,8 @@ const scaffoldEthProvider = navigator.onLine
   : null;
 const poktMainnetProvider = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider(
-      "https://eth-mainnet.gateway.pokt.network/v1/lb/611156b4a585a20035148406",
-    )
+    "https://eth-mainnet.gateway.pokt.network/v1/lb/611156b4a585a20035148406",
+  )
   : null;
 const mainnetInfura = navigator.onLine
   ? new ethers.providers.StaticJsonRpcProvider("https://mainnet.infura.io/v3/" + INFURA_ID)
@@ -168,8 +169,8 @@ function App(props) {
     poktMainnetProvider && poktMainnetProvider._isProvider
       ? poktMainnetProvider
       : scaffoldEthProvider && scaffoldEthProvider._network
-      ? scaffoldEthProvider
-      : mainnetInfura;
+        ? scaffoldEthProvider
+        : mainnetInfura;
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
@@ -252,9 +253,9 @@ function App(props) {
   );
   if (DEBUG) console.log("💵 stakerContractBalance", stakerContractBalance);
 
-  // ** keep track of total 'threshold' needed of ETH
-  const threshold = useContractReader(readContracts, "Staker", "threshold");
-  console.log("💵 threshold:", threshold);
+  // ** keep track of total 'minimumStackedAmount' needed of ETH
+  const minimumStackedAmount = useContractReader(readContracts, "Staker", "minimumStackedAmount");
+  console.log("💵 minimumStackedAmount:", minimumStackedAmount);
 
   // ** keep track of a variable from the contract in the local React state:
   const balanceStaked = useContractReader(readContracts, "Staker", "balances", [address]);
@@ -264,9 +265,49 @@ function App(props) {
   const stakeEvents = useEventListener(readContracts, "Staker", "Stake", localProvider, 1);
   console.log("📟 stake events:", stakeEvents);
 
-  // ** keep track of a variable from the contract in the local React state:
-  const timeLeft = useContractReader(readContracts, "Staker", "timeLeft");
-  console.log("⏳ timeLeft:", timeLeft);
+  // ** Keep an updated countdown using the timeLeft function
+  const getLocalStorageValue = (s) => localStorage.getItem(s);
+  const [timeleftHasBeenChecked, setTimeleftHasBeenChecked] = useState(false);
+  const [timeLeft, setTimeLeft] = useState();
+  const [countdownDate, setCountdownDate] = useState({ date: Date.now(), delay: timeLeft * 1000 })
+  const newTimeleft = useContractReader(readContracts, "Staker", "timeLeft");
+
+  if (!timeleftHasBeenChecked && newTimeleft !== undefined) {
+    setTimeleftHasBeenChecked(true);
+    setTimeLeft(newTimeleft.toNumber());
+    setCountdownDate({ date: Date.now(), delay: (newTimeleft.toNumber() * 1000) });
+    console.log("## newtimeleft:", newTimeleft.toNumber());
+  }
+
+  useEffect(() => {
+    const deadlineDate = getLocalStorageValue("deadline_date");
+    console.log("## DEADLINE DATE: ", deadlineDate);
+    console.log("## ⏳ timeLeft:", timeLeft);
+    const currentTime = Date.now();
+    if (deadlineDate != null && !isNaN(deadlineDate)) {
+
+
+      //Do you reach the end?
+      if (currentTime > parseInt(deadlineDate, 10)) {
+        console.log("## DELETING STORED DATE");
+        //Yes we clear uour saved end date
+        if (localStorage.getItem("deadline_date").length > 0)
+          localStorage.removeItem("deadline_date");
+      } else {
+        console.log("## Setting new countdown: ", parseInt(deadlineDate, 10) - currentTime);
+        //No update the end date  
+
+        setCountdownDate({ date: currentTime, delay: parseInt(deadlineDate, 10) - currentTime });
+      }
+    } else {
+      console.log("## Storing new deadlinedate: ", currentTime + timeLeft * 1000);
+      localStorage.setItem(
+        "deadline_date",
+        JSON.stringify(currentTime + (timeLeft * 1000))
+      )
+    }
+  }, [timeLeft]);
+  //----
 
   // ** Listen for when the contract has been 'completed'
   const complete = useContractReader(readContracts, "ExampleExternalContract", "completed");
@@ -492,7 +533,7 @@ function App(props) {
               }}
               to="/"
             >
-              Staker UI
+              Stake
             </Link>
           </Menu.Item>
           <Menu.Item key="/contracts">
@@ -502,7 +543,7 @@ function App(props) {
               }}
               to="/contracts"
             >
-              Debug Contracts
+              Contract Interactions
             </Link>
           </Menu.Item>
         </Menu>
@@ -518,12 +559,20 @@ function App(props) {
 
             <div style={{ padding: 8, marginTop: 32 }}>
               <div>Timeleft:</div>
-              {timeLeft && humanizeDuration(timeLeft.toNumber() * 1000)}
+
+              <Countdown
+                date={countdownDate.date + countdownDate.delay}
+                onComplete={() => {
+                  if (localStorage.getItem("deadline_date") != null)
+                    localStorage.removeItem("deadline_date");
+                }}
+              />
+              {/*timeLeft && humanizeDuration(timeLeft * 1000)*/}
             </div>
 
             <div style={{ padding: 8 }}>
               <div>Total staked:</div>
-              <Balance balance={stakerContractBalance} fontSize={64} />/<Balance balance={threshold} fontSize={64} />
+              <Balance balance={stakerContractBalance} fontSize={64} />/<Balance balance={minimumStackedAmount} fontSize={64} />
             </div>
 
             <div style={{ padding: 8 }}>
@@ -546,7 +595,7 @@ function App(props) {
               <Button
                 type={"default"}
                 onClick={() => {
-                  tx(writeContracts.Staker.withdraw(address));
+                  tx(writeContracts.Staker.withdraw());
                 }}
               >
                 🏧 Withdraw
@@ -577,7 +626,7 @@ function App(props) {
                 renderItem={item => {
                   return (
                     <List.Item key={item.blockNumber}>
-                      <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> 
+                      <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} />
                       <Balance balance={item.args[1]} />
                     </List.Item>
                   );

@@ -38,7 +38,7 @@ describe("🚩 Challenge 1: 🥩 Decentralized Staking App", function () {
       });
       it("Should deploy Staker", async function () {
         const Staker = await ethers.getContractFactory("Staker");
-        stakerContract = await Staker.deploy(exampleExternalContract.address);
+        stakerContract = await Staker.deploy(exampleExternalContract.address, 1);
       });
     }
 
@@ -108,7 +108,7 @@ describe("🚩 Challenge 1: 🥩 Decentralized Staking App", function () {
           exampleExternalContract = await ExampleExternalContract.deploy();
 
           const Staker = await ethers.getContractFactory("Staker");
-          stakerContract = await Staker.deploy(exampleExternalContract.address);
+          stakerContract = await Staker.deploy(exampleExternalContract.address, 1);
 
           console.log('\t'," 🔨 Staking...")
           const stakeResult = await stakerContract.stake({value: ethers.utils.parseEther("0.001")});
