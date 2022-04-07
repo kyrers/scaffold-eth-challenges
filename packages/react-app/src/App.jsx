@@ -6,7 +6,6 @@ import "antd/dist/antd.css";
 import React, { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import Web3Modal from "web3modal";
-import Countdown from "react-countdown";
 import "./App.css";
 import { Account, Address, Balance, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
@@ -265,48 +264,9 @@ function App(props) {
   const stakeEvents = useEventListener(readContracts, "Staker", "Stake", localProvider, 1);
   console.log("📟 stake events:", stakeEvents);
 
-  // ** Keep an updated countdown using the timeLeft function
-  const getLocalStorageValue = (s) => localStorage.getItem(s);
-  const [timeleftHasBeenChecked, setTimeleftHasBeenChecked] = useState(false);
-  const [timeLeft, setTimeLeft] = useState();
-  const [countdownDate, setCountdownDate] = useState({ date: Date.now(), delay: timeLeft * 1000 })
-  const newTimeleft = useContractReader(readContracts, "Staker", "timeLeft");
-
-  if (!timeleftHasBeenChecked && newTimeleft !== undefined) {
-    setTimeleftHasBeenChecked(true);
-    setTimeLeft(newTimeleft.toNumber());
-    setCountdownDate({ date: Date.now(), delay: (newTimeleft.toNumber() * 1000) });
-    console.log("## newtimeleft:", newTimeleft.toNumber());
-  }
-
-  useEffect(() => {
-    const deadlineDate = getLocalStorageValue("deadline_date");
-    console.log("## DEADLINE DATE: ", deadlineDate);
-    console.log("## ⏳ timeLeft:", timeLeft);
-    const currentTime = Date.now();
-    if (deadlineDate != null && !isNaN(deadlineDate)) {
-
-
-      //Do you reach the end?
-      if (currentTime > parseInt(deadlineDate, 10)) {
-        console.log("## DELETING STORED DATE");
-        //Yes we clear uour saved end date
-        if (localStorage.getItem("deadline_date").length > 0)
-          localStorage.removeItem("deadline_date");
-      } else {
-        console.log("## Setting new countdown: ", parseInt(deadlineDate, 10) - currentTime);
-        //No update the end date  
-
-        setCountdownDate({ date: currentTime, delay: parseInt(deadlineDate, 10) - currentTime });
-      }
-    } else {
-      console.log("## Storing new deadlinedate: ", currentTime + timeLeft * 1000);
-      localStorage.setItem(
-        "deadline_date",
-        JSON.stringify(currentTime + (timeLeft * 1000))
-      )
-    }
-  }, [timeLeft]);
+  //Handle timeleft
+  let timeLeft = useContractReader(readContracts, "Staker", "timeLeft");
+  console.log("## ⏳ timeLeft:", timeLeft);
   //----
 
   // ** Listen for when the contract has been 'completed'
@@ -489,6 +449,10 @@ function App(props) {
     setRoute(window.location.pathname);
   }, [setRoute]);
 
+  const refresh = async () => {
+    timeLeft = useContractReader(readContracts, "Staker", "timeLeft");
+  };
+
   let faucetHint = "";
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
 
@@ -559,15 +523,13 @@ function App(props) {
 
             <div style={{ padding: 8, marginTop: 32 }}>
               <div>Timeleft:</div>
-
-              <Countdown
-                date={countdownDate.date + countdownDate.delay}
-                onComplete={() => {
-                  if (localStorage.getItem("deadline_date") != null)
-                    localStorage.removeItem("deadline_date");
-                }}
-              />
-              {/*timeLeft && humanizeDuration(timeLeft * 1000)*/}
+              {timeLeft !== undefined && timeLeft.toNumber() > 0 ?
+                <span>
+                  {timeLeft && humanizeDuration(timeLeft * 1000)}
+                </span>
+                :
+                <span>Deadline reached!</span>
+              }
             </div>
 
             <div style={{ padding: 8 }}>
