@@ -24,6 +24,8 @@ contract Staker is Ownable {
 
   //Events
   event Stake(address staker, uint256 amount);
+  event Withdraw(address staker, uint256 amount);
+  event RestartClock(address restarter);
   //------
   
   //Modifiers
@@ -66,7 +68,7 @@ contract Staker is Ownable {
   constructor(address _exampleExternalContractAddress, uint256 _minimumStackedAmount) isValidAmount(_minimumStackedAmount) {
     exampleExternalContract = ExampleExternalContract(_exampleExternalContractAddress);
     minimumStackedAmount = _minimumStackedAmount * 1 ether;
-    deadline = block.timestamp + 3 minutes;
+    deadline = block.timestamp + 72 hours;
   }
 
 
@@ -115,6 +117,8 @@ contract Staker is Ownable {
     // Transfer balance back to the user
     (bool sent, ) = msg.sender.call{value: userBalance}("");
     require(sent, "Failed to send user balance back to the user");
+
+    emit Withdraw(msg.sender, userBalance);
   }
 
   /**
@@ -132,6 +136,7 @@ contract Staker is Ownable {
   * @notice Allows the owner to restart the deadline if the current one was reached
   */
   function restartClock() external onlyOwner deadlineReached(true) {
-    deadline = block.timestamp + 1 minutes;
+    deadline = block.timestamp + 72 hours;
+    emit RestartClock(msg.sender);
   }
 }

@@ -50,7 +50,7 @@ const { ethers } = require("ethers");
 */
 
 /// 📡 What chain are your contracts deployed to?
-const targetNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const targetNetwork = NETWORKS.rinkeby; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -264,9 +264,16 @@ function App(props) {
   const stakeEvents = useEventListener(readContracts, "Staker", "Stake", localProvider, 1);
   console.log("📟 stake events:", stakeEvents);
 
+  const withdrawEvents = useEventListener(readContracts, "Staker", "Withdraw", localProvider, 1);
+  console.log("📟 withdraw events:", withdrawEvents);
+
+
   //Handle timeleft
   let timeLeft = useContractReader(readContracts, "Staker", "timeLeft");
-  console.log("## ⏳ timeLeft:", timeLeft);
+  console.log("⏳ timeLeft:", timeLeft);
+
+  const restartClockEvents = useEventListener(readContracts, "Staker", "RestartClock", localProvider, 1);
+  console.log("⏳ Restart Clock Events:", restartClockEvents);
   //----
 
   // ** Listen for when the contract has been 'completed'
@@ -516,63 +523,70 @@ function App(props) {
           <Route exact path="/">
             {completeDisplay}
 
-            <div style={{ padding: 8, marginTop: 32 }}>
-              <div>Staker Contract:</div>
-              <Address value={readContracts && readContracts.Staker && readContracts.Staker.address} />
-            </div>
-
-            <div style={{ padding: 8, marginTop: 32 }}>
-              <div>Timeleft:</div>
-              {timeLeft !== undefined && timeLeft.toNumber() > 0 ?
-                <span>
-                  {timeLeft && humanizeDuration(timeLeft * 1000)}
+            <div className="all-info-panel">
+              <div className="stake-info-panel">
+                <span style={{ fontSize: "30px" }}>
+                  You staked: <Balance balance={balanceStaked} /> ETH
                 </span>
-                :
-                <span>Deadline reached!</span>
-              }
-            </div>
+                <br />
+                <span style={{ fontSize: "30px" }}>
+                  Total staked: <Balance balance={stakerContractBalance} /> ETH / <Balance balance={minimumStackedAmount} /> ETH
+                </span>
 
-            <div style={{ padding: 8 }}>
-              <div>Total staked:</div>
-              <Balance balance={stakerContractBalance} fontSize={64} />/<Balance balance={minimumStackedAmount} fontSize={64} />
-            </div>
+                <div className="stake-panel-action-buttons">
 
-            <div style={{ padding: 8 }}>
-              <div>You staked:</div>
-              <Balance balance={balanceStaked} fontSize={64} />
-            </div>
+                  <div>
+                    <Button
+                      className="action-button"
+                      shape="round"
+                      size="medium"
+                      type={balanceStaked ? "success" : "primary"}
+                      onClick={() => {
+                        tx(writeContracts.Staker.stake({ value: ethers.utils.parseEther("0.5") }));
+                      }}
+                    >
+                      🥩 Stake 0.5 ether!
+                    </Button>
+                  </div>
 
-            <div style={{ padding: 8 }}>
-              <Button
-                type={"default"}
-                onClick={() => {
-                  tx(writeContracts.Staker.execute());
-                }}
-              >
-                📡 Execute!
-              </Button>
-            </div>
+                  <div>
+                    <Button
+                      className="action-button"
+                      shape="round"
+                      size="medium"
+                      onClick={() => {
+                        tx(writeContracts.Staker.withdraw());
+                      }}
+                    >
+                      🏧 Withdraw
+                    </Button>
+                  </div>
 
-            <div style={{ padding: 8 }}>
-              <Button
-                type={"default"}
-                onClick={() => {
-                  tx(writeContracts.Staker.withdraw());
-                }}
-              >
-                🏧 Withdraw
-              </Button>
-            </div>
+                  <div>
+                    <Button
+                      className="action-button"
+                      shape="round"
+                      size="medium"
+                      onClick={() => {
+                        tx(writeContracts.Staker.execute());
+                      }}
+                    >
+                      📡 Execute!
+                    </Button>
+                  </div>
+                </div>
 
-            <div style={{ padding: 8 }}>
-              <Button
-                type={balanceStaked ? "success" : "primary"}
-                onClick={() => {
-                  tx(writeContracts.Staker.stake({ value: ethers.utils.parseEther("0.5") }));
-                }}
-              >
-                🥩 Stake 0.5 ether!
-              </Button>
+              </div>
+              <div className="timeleft-info-panel">
+                <span style={{ fontSize: "28px" }}>Timeleft: </span>
+                {timeLeft !== undefined && timeLeft.toNumber() > 0 ?
+                  <span style={{ fontSize: "28px" }}>
+                    {timeLeft && humanizeDuration(timeLeft * 1000)}
+                  </span>
+                  :
+                  <span style={{ fontSize: "28px" }}>Deadline reached!</span>
+                }
+              </div>
             </div>
 
             {/*
@@ -581,19 +595,58 @@ function App(props) {
                 and give you a form to interact with it locally
             */}
 
-            <div style={{ width: 500, margin: "auto", marginTop: 64 }}>
-              <div>Stake Events:</div>
-              <List
-                dataSource={stakeEvents}
-                renderItem={item => {
-                  return (
-                    <List.Item key={item.blockNumber}>
-                      <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} />
-                      <Balance balance={item.args[1]} />
-                    </List.Item>
-                  );
-                }}
-              />
+            <div className="events-panel">
+              <div className="individual-events-panel">
+                <h1>Stake Events:</h1>
+                <List
+                  className="events-list"
+                  dataSource={stakeEvents}
+                  renderItem={item => {
+                    return (
+                      <List.Item key={item.blockNumber}>
+                        <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} className="justify-content-space-evenly" />
+                        <span>staked</span>
+                        <Balance balance={item.args[1]} size={16} />
+                        <span>ETH</span>
+                      </List.Item>
+                    );
+                  }}
+                />
+              </div>
+
+              <div className="individual-events-panel">
+                <h1>Withdraw Events:</h1>
+                <List
+                  className="events-list"
+                  dataSource={withdrawEvents}
+                  renderItem={item => {
+                    return (
+                      <List.Item key={item.blockNumber} className="justify-content-space-evenly">
+                        <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} />
+                        <span>withdrew</span>
+                        <Balance balance={item.args[1]} size={16} />
+                        <span>ETH</span>
+                      </List.Item>
+                    );
+                  }}
+                />
+              </div>
+
+              <div className="individual-events-panel">
+                <h1>Restart clock Events:</h1>
+                <List
+                  className="events-list margin-top-24"
+                  dataSource={restartClockEvents}
+                  renderItem={item => {
+                    return (
+                      <List.Item key={item.blockNumber}>
+                        <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} className="justify-content-space-evenly" />
+                        <span>restarted the clock</span>
+                      </List.Item>
+                    );
+                  }}
+                />
+              </div>
             </div>
 
             {/* uncomment for a second contract:
@@ -608,22 +661,24 @@ function App(props) {
             */}
           </Route>
           <Route path="/contracts">
-            <Contract
-              name="Staker"
-              signer={userSigner}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-              contractConfig={contractConfig}
-            />
-            <Contract
-              name="ExampleExternalContract"
-              signer={userSigner}
-              provider={localProvider}
-              address={address}
-              blockExplorer={blockExplorer}
-              contractConfig={contractConfig}
-            />
+            <div className="contract-interaction-panel">
+              <Contract
+                name="Staker"
+                signer={userSigner}
+                provider={localProvider}
+                address={address}
+                blockExplorer={blockExplorer}
+                contractConfig={contractConfig}
+              />
+              <Contract
+                name="ExampleExternalContract"
+                signer={userSigner}
+                provider={localProvider}
+                address={address}
+                blockExplorer={blockExplorer}
+                contractConfig={contractConfig}
+              />
+            </div>
           </Route>
         </Switch>
       </BrowserRouter>
@@ -644,17 +699,6 @@ function App(props) {
           blockExplorer={blockExplorer}
         />
         {faucetHint}
-      </div>
-
-      <div style={{ marginTop: 32, opacity: 0.5 }}>
-        {/* Add your address here */}
-        Created by <Address value={"Your...address"} ensProvider={mainnetProvider} fontSize={16} />
-      </div>
-
-      <div style={{ marginTop: 32, opacity: 0.5 }}>
-        <a target="_blank" style={{ padding: 32, color: "#000" }} href="https://github.com/scaffold-eth/scaffold-eth">
-          🍴 Fork me!
-        </a>
       </div>
 
       {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}

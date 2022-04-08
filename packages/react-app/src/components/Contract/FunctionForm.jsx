@@ -1,4 +1,4 @@
-import { Button, Col, Divider, Input, Row, Tooltip } from "antd";
+import { Button, Col, Divider, Input, Row, Tooltip, Modal } from "antd";
 import React, { useState } from "react";
 import Blockies from "react-blockies";
 import { Transactor } from "../../helpers";
@@ -15,6 +15,7 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
   const [form, setForm] = useState({});
   const [txValue, setTxValue] = useState();
   const [returnValue, setReturnValue] = useState();
+  const [isToDisplayResult, setIsToDisplayResult] = useState(false);
 
   const tx = Transactor(provider, gasPrice);
 
@@ -166,67 +167,75 @@ export default function FunctionForm({ contractFunction, functionInfo, provider,
       <Button style={{ marginLeft: -32 }}>Send💸</Button>
     );
   inputs.push(
-    <div style={{ cursor: "pointer", margin: 2 }} key="goButton">
-      <Input
-        onChange={e => setReturnValue(e.target.value)}
-        defaultValue=""
-        bordered={false}
-        disabled
-        value={returnValue}
-        suffix={
-          <div
-            style={{ width: 50, height: 30, margin: 0 }}
-            type="default"
-            onClick={async () => {
-              const args = functionInfo.inputs.map((input, inputIndex) => {
-                const key = getFunctionInputKey(functionInfo, input, inputIndex);
-                let value = form[key];
-                if (input.baseType === "array") {
-                  value = JSON.parse(value);
-                } else if (input.type === "bool") {
-                  if (value === "true" || value === "1" || value === "0x1" || value === "0x01" || value === "0x0001") {
-                    value = 1;
-                  } else {
-                    value = 0;
+    !isToDisplayResult ?
+      <div style={{ cursor: "pointer", margin: 2 }} key="goButton" >
+        <Input
+          onChange={e => setReturnValue(e.target.value)}
+          defaultValue=""
+          bordered={false}
+          disabled
+          value=""
+          suffix={
+            <div
+              style={{ width: 50, height: 30, margin: 0 }}
+              type="default"
+              onClick={async () => {
+                const args = functionInfo.inputs.map((input, inputIndex) => {
+                  const key = getFunctionInputKey(functionInfo, input, inputIndex);
+                  let value = form[key];
+                  if (input.baseType === "array") {
+                    value = JSON.parse(value);
+                  } else if (input.type === "bool") {
+                    if (value === "true" || value === "1" || value === "0x1" || value === "0x01" || value === "0x0001") {
+                      value = 1;
+                    } else {
+                      value = 0;
+                    }
                   }
-                }
-                return value;
-              });
+                  return value;
+                });
 
-              let result;
-              if (functionInfo.stateMutability === "view" || functionInfo.stateMutability === "pure") {
-                try {
-                  const returned = await contractFunction(...args);
+                let result;
+                if (functionInfo.stateMutability === "view" || functionInfo.stateMutability === "pure") {
+                  try {
+                    const returned = await contractFunction(...args);
+                    result = tryToDisplay(returned);
+                  } catch (err) {
+                    console.error(err);
+                  }
+                } else {
+                  const overrides = {};
+                  if (txValue) {
+                    overrides.value = txValue; // ethers.utils.parseEther()
+                  }
+                  if (gasPrice) {
+                    overrides.gasPrice = gasPrice;
+                  }
+                  // Uncomment this if you want to skip the gas estimation for each transaction
+                  // overrides.gasLimit = hexlify(1200000);
+
+                  // console.log("Running with extras",extras)
+                  const returned = await tx(contractFunction(...args, overrides));
                   result = tryToDisplay(returned);
-                } catch (err) {
-                  console.error(err);
                 }
-              } else {
-                const overrides = {};
-                if (txValue) {
-                  overrides.value = txValue; // ethers.utils.parseEther()
-                }
-                if (gasPrice) {
-                  overrides.gasPrice = gasPrice;
-                }
-                // Uncomment this if you want to skip the gas estimation for each transaction
-                // overrides.gasLimit = hexlify(1200000);
 
-                // console.log("Running with extras",extras)
-                const returned = await tx(contractFunction(...args, overrides));
-                result = tryToDisplay(returned);
-              }
-
-              console.log("SETTING RESULT:", result);
-              setReturnValue(result);
-              triggerRefresh(true);
-            }}
-          >
-            {buttonIcon}
-          </div>
-        }
-      />
-    </div>,
+                console.log("SETTING RESULT:", result);
+                setReturnValue(result);
+                setIsToDisplayResult(true);
+                triggerRefresh(true);
+              }}
+            >
+              {buttonIcon}
+            </div>
+          }
+        />
+      </div >
+      :
+      <div>
+        <Modal className="contract-interaction-result-modal" visible={isToDisplayResult} title="Transaction Result" onOk={() => setIsToDisplayResult(!isToDisplayResult)} onCancel={() => setIsToDisplayResult(!isToDisplayResult)}>
+          {returnValue}
+        </Modal>
+      </div>
   );
 
   return (

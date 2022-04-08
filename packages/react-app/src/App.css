@@ -1,3 +1,93 @@
+/* Component specific */
+::-webkit-scrollbar {
+  background: gray;
+  width: 10px;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: darkgray;
+  border-radius: 5px;
+}
+
 .App {
   text-align: center;
+}
+.all-info-panel {
+  margin-top: 50px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.stake-info-panel {
+  flex: 1 1 auto;
+  background: cadetblue;
+  border-radius: 150px;
+  height: 150px;
+  margin-right: 20px;
+}
+
+.stake-panel-action-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+.action-button {
+  margin: 0px 10px 10px 10px;
+  border-radius: 10px;
+  background: darkcyan !important;
+}
+
+.timeleft-info-panel {
+  flex: 1 1 auto;
+  background: cadetblue;
+  border-radius: 150px;
+  height: 150px;
+  margin-right: 20px;
+}
+
+.events-panel {
+  display: flex;
+  margin: "auto";
+  margin-top: 64px;
+}
+
+.individual-events-panel {
+  flex: 1 1 auto;
+  background: cadetblue;
+  margin: 10px;
+  border-radius: 25px;
+  overflow-y: auto;
+  max-height: 450px;
+}
+
+.events-list {
+  padding: 0px 10px 0px 10px !important;
+}
+
+.contract-interaction-panel {
+  margin: auto !important;
+  width: 90vw !important;
+  height: 70vh;
+  overflow-y: auto;
+  background: cadetblue !important;
+  border-radius: 20px !important;
+}
+
+
+.contract-interaction-result-modal {
+  min-width: 250px;
+  width: max-content !important;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+/*---------*/
+
+/* General */
+.justify-content-space-evenly {
+  justify-content: space-evenly !important;
+}
+
+.margin-top-24 {
+  margin-top: 24px !important;
 }

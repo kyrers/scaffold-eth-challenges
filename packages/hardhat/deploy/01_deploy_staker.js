@@ -26,7 +26,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
 
   //Giving you ownership
   console.log("---- Giving you ownership ----");
-  await Staker.transferOwnership("");
+  await Staker.transferOwnership("YOUR_ADDRESS");
 
   // await YourContract.setPurpose("Hello");
 
