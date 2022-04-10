@@ -17,7 +17,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const yourToken = await ethers.getContract("YourToken", deployer);
 
   //transfer tokens to frontend address
-  const result = await yourToken.transfer("0x35Dc1Bfc51C5Bee06AE9238F57A0453c89cf24f5", ethers.utils.parseEther("1000") );
+  //const result = await yourToken.transfer("0x35Dc1Bfc51C5Bee06AE9238F57A0453c89cf24f5", ethers.utils.parseEther("1000") );
 
   // ToDo: To take ownership of yourContract using the ownable library uncomment next line and add the
   // address you want to be the owner.
