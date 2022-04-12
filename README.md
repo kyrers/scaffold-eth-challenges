@@ -5,5 +5,5 @@
 ## Example External contract: [Example External contract](https://rinkeby.etherscan.io/address/0xE475BD5056b0AD6F0D49c0dd192949B66E7f2874)
 
 Please note that I took the liberty to make a few modifications to the Staker contract, even though they weren't explicit in the challenge. Namely:
-- Allowed the owner of the contract, which is receives the contract ownership on deploy, to update the minimum stacked ETH amount and to restart the clock if the deadline has been reached;
+- Allowed the owner of the contract, which receives the contract ownership on deploy, to update the minimum stacked ETH amount and to restart the clock if the deadline has been reached;
 - Added events for withdraw and restart clock calls;
