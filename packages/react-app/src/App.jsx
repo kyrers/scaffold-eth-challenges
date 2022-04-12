@@ -593,132 +593,147 @@ function App(props) {
 
         <Switch>
           <Route exact path="/">
-            <div style={{ padding: 8, marginTop: 32, width: 300, margin: "auto" }}>
-              <Card title="Your Tokens" extra={<a href="#">code</a>}>
-                <div style={{ padding: 8 }}>
-                  <Balance balance={yourTokenBalance} fontSize={64} />
-                </div>
-              </Card>
-            </div>
-            {transferDisplay}
-            <Divider />
-            <div style={{ padding: 8, marginTop: 32, width: 300, margin: "auto" }}>
-              <Card title="Buy Tokens" extra={<a href="#">code</a>}>
-                <div style={{ padding: 8 }}>{tokensPerEth && tokensPerEth.toNumber()} tokens per ETH</div>
-                <div style={{ padding: 8 }}>
-                  <Input
-                    style={{ textAlign: "center" }}
-                    placeholder={"amount of tokens to buy"}
-                    value={tokenBuyAmount.value}
-                    onChange={e => {
-                      const newValue = e.target.value.startsWith(".") ? "0." : e.target.value;
-                      const buyAmount = {
-                        value: newValue,
-                        valid: /^\d*\.?\d+$/.test(newValue)
-                      }
-                      setTokenBuyAmount(buyAmount);
-                    }}
-                  />
-                  <Balance balance={ethCostToPurchaseTokens} dollarMultiplier={price} />
-                </div>
+            <div className="main-panel">
 
-                <div style={{ padding: 8 }}>
-                  <Button
-                    type={"primary"}
-                    loading={buying}
-                    onClick={async () => {
-                      setBuying(true);
-                      await tx(writeContracts.Vendor.buyTokens({ value: ethCostToPurchaseTokens }));
-                      setBuying(false);
-                    }}
-                    disabled={!tokenBuyAmount.valid}
-                  >
-                    Buy Tokens
-                  </Button>
+              <div className="user-panel">
+                <div className="user-actions-panel">
+                  <div style={{ padding: 8, marginTop: 32, width: 300, margin: "auto" }}>
+                    <Card title="Your Tokens">
+                      <div style={{ padding: 8 }}>
+                        <Balance balance={yourTokenBalance} fontSize={64} />
+                      </div>
+                    </Card>
+                  </div>
+                  {transferDisplay}
                 </div>
-              </Card>
-            </div>
+              </div>
 
-            <div style={{ padding: 8, marginTop: 32, width: 300, margin: "auto" }}>
-              <Card title="Sell Tokens">
-                <div style={{ padding: 8 }}>{tokensPerEth && tokensPerEth.toNumber()} tokens per ETH</div>
-
-                <div style={{ padding: 8 }}>
-                  <Input
-                    style={{ textAlign: "center" }}
-                    placeholder={"amount of tokens to sell"}
-                    value={tokenSellAmount.value}
-                    onChange={e => {
-                      const newValue = e.target.value.startsWith(".") ? "0." : e.target.value;
-                      const sellAmount = {
-                        value: newValue,
-                        valid: /^\d*\.?\d+$/.test(newValue)
-                      }
-                      setTokenSellAmount(sellAmount);
-                    }}
-                  />
-                  <Balance balance={ethValueToSellTokens} dollarMultiplier={price} />
-                </div>
-                {isSellAmountApproved ?
+              <div className="vendor-panel">
+                <div className="vendor-balances-panel">
+                  <div style={{ padding: 8 }}>
+                    <div>Vendor Token Balance:</div>
+                    <Balance balance={vendorTokenBalance} fontSize={64} />
+                  </div>
 
                   <div style={{ padding: 8 }}>
-                    <Button
-                      disabled={true}
-                      type={"primary"}
-                    >
-                      Approve Tokens
-                    </Button>
-                    <Button
-                      type={"primary"}
-                      loading={buying}
-                      onClick={async () => {
-                        setBuying(true);
-                        await tx(writeContracts.Vendor.sellTokens(tokenSellAmount.valid && ethers.utils.parseEther(tokenSellAmount.value)));
-                        setBuying(false);
-                        setTokenSellAmount("");
-                      }}
-                      disabled={!tokenSellAmount.valid}
-                    >
-                      Sell Tokens
-                    </Button>
+                    <div>Vendor ETH Balance:</div>
+                    <Balance balance={vendorETHBalance} fontSize={64} /> ETH
                   </div>
-                  :
-                  <div style={{ padding: 8 }}>
-                    <Button
-                      type={"primary"}
-                      loading={buying}
-                      onClick={async () => {
-                        setBuying(true);
-                        await tx(writeContracts.YourToken.approve(readContracts.Vendor.address, tokenSellAmount.valid && ethers.utils.parseEther(tokenSellAmount.value)));
-                        setBuying(false);
-                        let resetAmount = tokenSellAmount
-                        setTokenSellAmount("");
-                        setTimeout(() => {
-                          setTokenSellAmount(resetAmount)
-                        }, 1500)
-                      }}
-                      disabled={!tokenSellAmount.valid}
-                    >
-                      Approve Tokens
-                    </Button>
-                    <Button
-                      disabled={true}
-                      type={"primary"}
-                    >
-                      Sell Tokens
-                    </Button>
-                  </div>
-                }
-              </Card>
-            </div>
-            <div style={{ padding: 8, marginTop: 32 }}>
-              <div>Vendor Token Balance:</div>
-              <Balance balance={vendorTokenBalance} fontSize={64} />
-            </div>
+                </div>
 
-            <div style={{ padding: 8 }}>
-              <div>Vendor ETH Balance:</div>
-              <Balance balance={vendorETHBalance} fontSize={64} /> ETH
+                <div className="vendor-actions-panel">
+                  <div className="vendor-buy-tokens-card">
+                    <Card title="Buy Tokens">
+                      <div style={{ padding: 8 }}>{tokensPerEth && tokensPerEth.toNumber()} tokens per ETH</div>
+                      <div style={{ padding: 8 }}>
+                        <Input
+                          style={{ textAlign: "center" }}
+                          placeholder={"amount of tokens to buy"}
+                          value={tokenBuyAmount.value}
+                          onChange={e => {
+                            const newValue = e.target.value.startsWith(".") ? "0." : e.target.value;
+                            const buyAmount = {
+                              value: newValue,
+                              valid: /^\d*\.?\d+$/.test(newValue)
+                            }
+                            setTokenBuyAmount(buyAmount);
+                          }}
+                        />
+                        <Balance balance={ethCostToPurchaseTokens} dollarMultiplier={price} />
+                      </div>
+
+                      <div style={{ padding: 8 }}>
+                        <Button
+                          type={"primary"}
+                          loading={buying}
+                          onClick={async () => {
+                            setBuying(true);
+                            await tx(writeContracts.Vendor.buyTokens({ value: ethCostToPurchaseTokens }));
+                            setBuying(false);
+                          }}
+                          disabled={!tokenBuyAmount.valid}
+                        >
+                          Buy Tokens
+                        </Button>
+                      </div>
+                    </Card>
+                  </div>
+
+
+                  <div className="vendor-sell-tokens-card">
+                    <Card title="Sell Tokens">
+                      <div style={{ padding: 8 }}>{tokensPerEth && tokensPerEth.toNumber()} tokens per ETH</div>
+
+                      <div style={{ padding: 8 }}>
+                        <Input
+                          style={{ textAlign: "center" }}
+                          placeholder={"amount of tokens to sell"}
+                          value={tokenSellAmount.value}
+                          onChange={e => {
+                            const newValue = e.target.value.startsWith(".") ? "0." : e.target.value;
+                            const sellAmount = {
+                              value: newValue,
+                              valid: /^\d*\.?\d+$/.test(newValue)
+                            }
+                            setTokenSellAmount(sellAmount);
+                          }}
+                        />
+                        <Balance balance={ethValueToSellTokens} dollarMultiplier={price} />
+                      </div>
+                      {isSellAmountApproved ?
+
+                        <div style={{ padding: 8 }}>
+                          <Button
+                            disabled={true}
+                            type={"primary"}
+                          >
+                            Approve Tokens
+                          </Button>
+                          <Button
+                            type={"primary"}
+                            loading={buying}
+                            onClick={async () => {
+                              setBuying(true);
+                              await tx(writeContracts.Vendor.sellTokens(tokenSellAmount.valid && ethers.utils.parseEther(tokenSellAmount.value)));
+                              setBuying(false);
+                              setTokenSellAmount("");
+                            }}
+                            disabled={!tokenSellAmount.valid}
+                          >
+                            Sell Tokens
+                          </Button>
+                        </div>
+                        :
+                        <div style={{ padding: 8 }}>
+                          <Button
+                            type={"primary"}
+                            loading={buying}
+                            onClick={async () => {
+                              setBuying(true);
+                              await tx(writeContracts.YourToken.approve(readContracts.Vendor.address, tokenSellAmount.valid && ethers.utils.parseEther(tokenSellAmount.value)));
+                              setBuying(false);
+                              let resetAmount = tokenSellAmount
+                              setTokenSellAmount("");
+                              setTimeout(() => {
+                                setTokenSellAmount(resetAmount)
+                              }, 1500)
+                            }}
+                            disabled={!tokenSellAmount.valid}
+                          >
+                            Approve Tokens
+                          </Button>
+                          <Button
+                            disabled={true}
+                            type={"primary"}
+                          >
+                            Sell Tokens
+                          </Button>
+                        </div>
+                      }
+                    </Card>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div style={{ width: 500, margin: "auto", marginTop: 64 }}>
@@ -810,20 +825,6 @@ function App(props) {
           blockExplorer={blockExplorer}
         />
         {faucetHint}
-      </div>
-
-      <div style={{ marginTop: 32, opacity: 0.5 }}>
-        Created by <Address value={"Your...address"} ensProvider={mainnetProvider} fontSize={16} />
-      </div>
-
-      <div style={{ marginTop: 32, paddingBottom: 128, opacity: 0.5 }}>
-        <a
-          target="_blank"
-          style={{ padding: 32, color: "#000" }}
-          href="https://github.com/austintgriffith/scaffold-eth"
-        >
-          🍴 Fork me!
-        </a>
       </div>
 
       {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}

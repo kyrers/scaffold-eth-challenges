@@ -1,3 +1,40 @@
 .App {
   text-align: center;
 }
+
+.main-panel {
+  display: flex;
+}
+
+.user-panel {
+  flex: 1 1 auto;
+  width: 50%;
+  background: burlywood;
+}
+
+.user-actions-panel {
+  display: flex;
+}
+
+.vendor-panel {
+  flex: 1 1 auto;
+  width: 50%;
+  background: chocolate;
+}
+
+.vendor-balances-panel {
+  display: flex;
+  justify-content: center;
+}
+
+.vendor-actions-panel {
+  display: flex;
+  justify-content: space-around;
+}
+
+.vendor-sell-tokens-card, .vendor-buy-tokens-card {
+  display: flex;
+  padding: 8px;
+  margin-top: 32px;
+  width: 300;
+}
