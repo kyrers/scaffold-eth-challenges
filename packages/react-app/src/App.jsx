@@ -517,13 +517,20 @@ function App(props) {
 
   const [tokenSendToAddress, setTokenSendToAddress] = useState();
   const [tokenSendAmount, setTokenSendAmount] = useState();
-
+  const [tokenApproveAddress, setTokenApproveAddress] = useState();
+  const [tokenApproveAmount, setTokenApproveAmount] = useState({
+    valid: false,
+    value: ''
+  });
+  const [approving, setApproving] = useState();
   const [buying, setBuying] = useState();
 
   let transferDisplay = "";
+  let approveDisplay = "";
+
   if (yourTokenBalance) {
     transferDisplay = (
-      <div style={{ padding: 8, marginTop: 32, width: 420, margin: "auto" }}>
+      <div className="user-transfer-tokens-card">
         <Card title="Transfer tokens">
           <div>
             <div style={{ padding: 8 }}>
@@ -553,6 +560,7 @@ function App(props) {
                   writeContracts.YourToken.transfer(tokenSendToAddress, ethers.utils.parseEther("" + tokenSendAmount)),
                 );
               }}
+              disabled={!tokenSendToAddress || !tokenSendAmount}
             >
               Send Tokens
             </Button>
@@ -560,6 +568,58 @@ function App(props) {
         </Card>
       </div>
     );
+
+    approveDisplay = (
+      <div className="user-transfer-tokens-card">
+        <Card title="Approve spender">
+          <div>
+            <div style={{ padding: 8 }}>
+              <AddressInput
+                ensProvider={mainnetProvider}
+                placeholder="spender address"
+                value={tokenApproveAddress}
+                onChange={setTokenApproveAddress}
+              />
+            </div>
+            <div style={{ padding: 8 }}>
+              <Input
+                style={{ textAlign: "center" }}
+                placeholder={"allowance"}
+                value={tokenApproveAmount.value}
+                onChange={e => {
+                  const newValue = e.target.value.startsWith(".") ? "0." : e.target.value;
+                  const tokenAmount = {
+                    value: newValue,
+                    valid: /^\d*\.?\d+$/.test(newValue)
+                  }
+                  setTokenApproveAmount(tokenAmount);
+                }}
+              />
+            </div>
+          </div>
+          <div style={{ padding: 8 }}>
+            <Button
+              loading={approving}
+              type={"primary"}
+              onClick={async () => {
+                setApproving(true);
+                await tx(writeContracts.YourToken.approve(tokenApproveAddress, tokenApproveAmount.valid && ethers.utils.parseEther(tokenApproveAmount.value)));
+                setApproving(false);
+                let resetAmount = tokenSellAmount
+                setTokenApproveAmount("");
+                setTimeout(() => {
+                  setTokenApproveAmount(resetAmount)
+                }, 1500)
+              }}
+              disabled={!tokenApproveAddress || !tokenApproveAmount.valid}
+            >
+              Approve
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+
   }
 
   return (
@@ -596,27 +656,27 @@ function App(props) {
             <div className="main-panel">
 
               <div className="user-panel">
-                <div className="user-actions-panel">
-                  <div style={{ padding: 8, marginTop: 32, width: 300, margin: "auto" }}>
-                    <Card title="Your Tokens">
-                      <div style={{ padding: 8 }}>
-                        <Balance balance={yourTokenBalance} fontSize={64} />
-                      </div>
-                    </Card>
+                <div className="user-balance-panel">
+                  <div style={{ padding: 8 }}>
+                    <h3><b>Your Token Balance:</b></h3>
+                    <Balance balance={yourTokenBalance} fontSize={64} />
                   </div>
+                </div>
+                <div className="user-actions-panel">
                   {transferDisplay}
+                  {approveDisplay}
                 </div>
               </div>
 
               <div className="vendor-panel">
                 <div className="vendor-balances-panel">
                   <div style={{ padding: 8 }}>
-                    <div>Vendor Token Balance:</div>
+                    <h3><b>Vendor Token Balance:</b></h3>
                     <Balance balance={vendorTokenBalance} fontSize={64} />
                   </div>
 
                   <div style={{ padding: 8 }}>
-                    <div>Vendor ETH Balance:</div>
+                    <h3><b>Vendor ETH Balance:</b></h3>
                     <Balance balance={vendorETHBalance} fontSize={64} /> ETH
                   </div>
                 </div>
@@ -682,29 +742,24 @@ function App(props) {
                       </div>
                       {isSellAmountApproved ?
 
-                        <div style={{ padding: 8 }}>
-                          <Button
-                            disabled={true}
-                            type={"primary"}
-                          >
+                        <div className="sell-tokens-buttons-panel">
+                          <Button disabled={true} type={"primary"}>
                             Approve Tokens
                           </Button>
-                          <Button
-                            type={"primary"}
-                            loading={buying}
-                            onClick={async () => {
-                              setBuying(true);
-                              await tx(writeContracts.Vendor.sellTokens(tokenSellAmount.valid && ethers.utils.parseEther(tokenSellAmount.value)));
-                              setBuying(false);
-                              setTokenSellAmount("");
-                            }}
+
+                          <Button type={"primary"} loading={buying} onClick={async () => {
+                            setBuying(true);
+                            await tx(writeContracts.Vendor.sellTokens(tokenSellAmount.valid && ethers.utils.parseEther(tokenSellAmount.value)));
+                            setBuying(false);
+                            setTokenSellAmount("");
+                          }}
                             disabled={!tokenSellAmount.valid}
                           >
                             Sell Tokens
                           </Button>
                         </div>
                         :
-                        <div style={{ padding: 8 }}>
+                        <div className="sell-tokens-buttons-panel">
                           <Button
                             type={"primary"}
                             loading={buying}
