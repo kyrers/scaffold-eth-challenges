@@ -60,7 +60,7 @@ const { ethers } = require("ethers");
 */
 
 /// 📡 What chain are your contracts deployed to?
-const targetNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const targetNetwork = NETWORKS.rinkeby; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -111,7 +111,7 @@ const walletLinkProvider = walletLink.makeWeb3Provider(`https://mainnet.infura.i
 const web3Modal = new Web3Modal({
   network: "mainnet", // Optional. If using WalletConnect on xDai, change network to "xdai" and add RPC info below for xDai chain.
   cacheProvider: true, // optional
-  theme: "light", // optional. Change to "dark" for a dark theme.
+  theme: "dark", // optional. Change to "dark" for a dark theme.
   providerOptions: {
     walletconnect: {
       package: WalletConnectProvider, // required
@@ -771,7 +771,7 @@ function App(props) {
                               setTokenSellAmount("");
                               setTimeout(() => {
                                 setTokenSellAmount(resetAmount)
-                              }, 1500)
+                              }, 2000)
                             }}
                             disabled={!tokenSellAmount.valid}
                           >
@@ -791,38 +791,33 @@ function App(props) {
               </div>
             </div>
 
-            <div style={{ width: 500, margin: "auto", marginTop: 64 }}>
-              <div>Buy Token Events:</div>
+            <div className="order-book-panel">
+              <div><h3><b>Order Book</b></h3></div>
               <List
-                dataSource={buyTokensEvents}
+                className="order-book-list"
+                dataSource={buyTokensEvents.concat(sellTokenEvents).sort((a, b) => a.blockNumber - b.blockNumber)}
                 renderItem={item => {
-                  return (
-                    <List.Item key={item.blockNumber + item.blockHash}>
-                      <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> paid
-                      <Balance balance={item.args[1]} />
-                      ETH to buy
-                      <Balance balance={item.args[2]} />
-                      Tokens
-                    </List.Item>
-                  );
-                }}
-              />
-            </div>
-
-            <div style={{ width: 500, margin: "auto", marginTop: 64 }}>
-              <div>Sell Token Events:</div>
-              <List
-                dataSource={sellTokenEvents}
-                renderItem={item => {
-                  return (
-                    <List.Item key={item.blockNumber + item.blockHash}>
-                      <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> sold
-                      <Balance balance={item.args[1]} />
-                      tokens for
-                      <Balance balance={item.args[2]} />
-                      ETH
-                    </List.Item>
-                  );
+                  if (item.event === "BuyTokens") {
+                    return (
+                      <List.Item key={item.blockNumber + item.blockHash} className="buy-token-event">
+                        <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> paid
+                        <Balance balance={item.args[1]} />
+                        ETH to buy
+                        <Balance balance={item.args[2]} />
+                        Tokens
+                      </List.Item>
+                    );
+                  } else {
+                    return (
+                      <List.Item key={item.blockNumber + item.blockHash} className="sell-token-event">
+                        <Address value={item.args[0]} ensProvider={mainnetProvider} fontSize={16} /> sold
+                        <Balance balance={item.args[1]} />
+                        tokens for
+                        <Balance balance={item.args[2]} />
+                        ETH
+                      </List.Item>
+                    );
+                  }
                 }}
               />
             </div>
@@ -863,8 +858,6 @@ function App(props) {
           </Route>
         </Switch>
       </BrowserRouter>
-
-      <ThemeSwitch />
 
       {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
       <div style={{ position: "fixed", textAlign: "right", right: 0, top: 0, padding: 10 }}>
