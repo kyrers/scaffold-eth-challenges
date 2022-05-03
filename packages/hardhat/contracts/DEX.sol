@@ -58,4 +58,40 @@ contract DEX {
     return (numerator / denominator);
   }
 
+  /**
+  * @notice Swap ETH for BAL.
+  * @return The number of BAL to receive
+  */
+  function ethToToken() external payable returns (uint256) {
+    require(msg.value > 0, "No ETH sent!");
+
+    uint256 tokenReserve = balloon.balanceOf(address(this));
+    uint256 ethReserve = address(this).balance - msg.value;
+    uint256 balReturn = price(msg.value, ethReserve, tokenReserve);
+
+    bool success = balloon.transfer(msg.sender, balReturn);
+    require(success, "Failed to send tokens to user.");
+    return balReturn;
+  }
+
+  /**
+  * @notice Swap ETH for BAL.
+  * @param _tokenAmount Amount of BAL to receive
+  * @return The number of BAL to receive
+  */
+  function tokenToEth(uint256 _tokenAmount) external payable returns (uint256) {
+    require(_tokenAmount > 0, "No tokens sent!");
+
+    uint256 tokenReserve = balloon.balanceOf(address(this));
+    uint256 ethReserve = address(this).balance - msg.value;
+    uint256 ethReturn = price(_tokenAmount, tokenReserve, ethReserve);
+
+    bool received = balloon.transferFrom(msg.sender, address(this), _tokenAmount);
+    require(received, "Failed to send tokens to the DEX.");
+
+    (bool sent, ) = msg.sender.call{ value: ethReturn }("");
+    require(sent, "Failed to send ETH to user.");
+    return ethReturn;
+  }
+
 }
