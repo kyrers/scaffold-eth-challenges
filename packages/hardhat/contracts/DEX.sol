@@ -94,4 +94,48 @@ contract DEX {
     return ethReturn;
   }
 
+  /**
+  * @notice Provide liquidity.
+  * @return The number of BAL provided as liquidity
+  */
+  function deposit() public payable returns (uint256) {
+      uint256 ethReserve = address(this).balance - msg.value;
+      uint256 tokenReserve = balloon.balanceOf(address(this));
+      uint256 tokenDeposit = ((msg.value * tokenReserve) / ethReserve) + 1;
+
+      uint256 liquidityMinted = (msg.value * totalLiquidity) / ethReserve;
+      liquidity[msg.sender] += liquidityMinted;
+      totalLiquidity += liquidityMinted;
+
+      bool success = balloon.transferFrom(msg.sender, address(this), tokenDeposit);
+      require(success, "Could not transfer BAL to the DEX.");
+
+      return tokenDeposit;
+  }
+
+  /**
+  * @notice Provide liquidity.
+  * @param _amount Amount of ETH to withdraw
+  * @return ethAmount - Amount of ETH withdrawn
+  * @return balAmount - Amount of BAL withdrawn
+  */
+  function withdraw(uint256 _amount) public returns (uint256 ethAmount, uint256 balAmount) {
+    require(liquidity[msg.sender] >= _amount, "Trying to withdraw too much.");
+    uint256 ethReserve = address(this).balance;
+    uint256 tokenReserve = balloon.balanceOf(address(this));
+    uint256 ethWithdrawn = (_amount * ethReserve) / totalLiquidity;
+
+    uint256 tokenAmount = (_amount * tokenReserve) / totalLiquidity;
+    liquidity[msg.sender] -= _amount;
+    totalLiquidity -= _amount;
+
+    (bool sentEth, ) = payable(msg.sender).call{ value: ethWithdrawn }("");
+    require(sentEth, "Could not transfer ETH back to you.");
+    
+    bool sentBal = balloon.transfer(msg.sender, tokenAmount);
+    require(sentBal, "Could not transfer BAL back to you.");
+       
+    return (ethWithdrawn, tokenAmount);
+  }
+
 }
