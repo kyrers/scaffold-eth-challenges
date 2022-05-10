@@ -19,6 +19,13 @@ contract DEX {
   //Liquidity by address
   mapping (address => uint256) public liquidity;
 
+
+  //##### EVENTS #####
+  event ETHSwap(address user, uint256 ethAmount, uint256 balAmount);
+  event BALSwap(address user, uint256 balAmount, uint256 ethAmount);
+  event AddLiquidity(address user, uint256 ethAmount, uint256 balAmount);
+  event WithdrawLiquidity(address user, uint256 ethAmount, uint256 balAmount);
+
   //##### FUNCTIONS #####
   /**
   * @notice Contract constructor. Initialize the IERC20 interface using the Balloon token contract address
@@ -71,6 +78,8 @@ contract DEX {
 
     bool success = balloon.transfer(msg.sender, balReturn);
     require(success, "Failed to send tokens to user.");
+
+    emit ETHSwap(msg.sender, msg.value, balReturn);
     return balReturn;
   }
 
@@ -91,6 +100,8 @@ contract DEX {
 
     (bool sent, ) = msg.sender.call{ value: ethReturn }("");
     require(sent, "Failed to send ETH to user.");
+
+    emit BALSwap(msg.sender, _tokenAmount, ethReturn);
     return ethReturn;
   }
 
@@ -110,11 +121,12 @@ contract DEX {
       bool success = balloon.transferFrom(msg.sender, address(this), tokenDeposit);
       require(success, "Could not transfer BAL to the DEX.");
 
+      emit AddLiquidity(msg.sender, liquidityMinted, tokenDeposit);
       return tokenDeposit;
   }
 
   /**
-  * @notice Provide liquidity.
+  * @notice Withdraw liquidity.
   * @param _amount Amount of ETH to withdraw
   * @return ethAmount - Amount of ETH withdrawn
   * @return balAmount - Amount of BAL withdrawn
@@ -134,7 +146,8 @@ contract DEX {
     
     bool sentBal = balloon.transfer(msg.sender, tokenAmount);
     require(sentBal, "Could not transfer BAL back to you.");
-       
+
+    emit WithdrawLiquidity(msg.sender, ethWithdrawn, tokenAmount);  
     return (ethWithdrawn, tokenAmount);
   }
 

@@ -7,6 +7,7 @@ import Address from "./Address";
 import Contract from "./Contract";
 import Curve from "./Curve.jsx";
 import TokenBalance from "./TokenBalance";
+import '../App.css';
 
 const contractName = "DEX";
 const tokenName = "Balloons";
@@ -133,24 +134,26 @@ export default function Dex(props) {
   }
 
   return (
-    <Row span={24}>
-      <Col span={12}>
-        <Card
-          title={
-            <div>
-              <Address value={contractAddress} />
-              <div style={{ float: "right", fontSize: 24 }}>
-                {parseFloat(ethers.utils.formatEther(contractBalance)).toFixed(4)} ⚖️
-                <TokenBalance name={tokenName} img={"🎈"} address={contractAddress} contracts={props.readContracts} />
+    <div className="main-panel">
+      <div className="contracts-panel">
+        <div className="dex-panel">
+          <Card
+            title={
+              <div>
+                <Address value={contractAddress} />
+                <div style={{ float: "right", fontSize: 24 }}>
+                  {parseFloat(ethers.utils.formatEther(contractBalance)).toFixed(4)} ⚖️
+                  <TokenBalance name={tokenName} img={"🎈"} address={contractAddress} contracts={props.readContracts} />
+                </div>
               </div>
-            </div>
-          }
-          size="large"
-          loading={false}
-        >
-          {display}
-        </Card>
-        <Row span={12}>
+            }
+            size="large"
+            loading={false}
+          >
+            {display}
+          </Card>
+        </div>
+        <div className="bal-panel">
           <Contract
             name="Balloons"
             signer={props.signer}
@@ -160,9 +163,9 @@ export default function Dex(props) {
             blockExplorer={props.blockExplorer}
             contractConfig={props.contractConfig}
           />
-        </Row>
-      </Col>
-      <Col span={12}>
+        </div>
+      </div>
+      <div className="info-panel">
         <div style={{ padding: 20 }}>
           <Curve
             addingEth={values && values["ethToToken"] ? values["ethToToken"] : 0}
@@ -173,7 +176,7 @@ export default function Dex(props) {
             height={500}
           />
         </div>
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 }
