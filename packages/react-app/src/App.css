@@ -14,14 +14,20 @@
   margin-top: 20px;
 }
 
-.dex-panel {
-
-}
-
-.bal-panel {
-
-}
-
 .info-panel {
   flex: 1 1 auto;
+}
+
+.events-panel {
+  display: flex;
+}
+
+.order-book-panel {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.liquidity-panel {
+  flex: 1 1 auto;
+  overflow-y: auto;
 }
