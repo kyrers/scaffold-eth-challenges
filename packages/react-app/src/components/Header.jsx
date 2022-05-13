@@ -5,8 +5,8 @@ import React from "react";
 
 export default function Header() {
   return (
-    <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank" rel="noopener noreferrer">
-      <PageHeader title="Minimum Viable Exchange" subTitle="" style={{ cursor: "pointer" }} />
+    <a href="https://github.com/kyrers/scaffold-eth-challenges/tree/challenge-5-dex" target="_blank" rel="noopener noreferrer">
+      <PageHeader title="Simple DEX" subTitle="By kyrers. Forked from 🏗 scaffold-eth" style={{ cursor: "pointer" }} />
     </a>
   );
 }

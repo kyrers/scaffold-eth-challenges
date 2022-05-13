@@ -187,7 +187,7 @@ export default function Dex(props) {
             <h3><b>Order Book</b></h3>
             <List
               className="order-book-list"
-              dataSource={ETHSwapEvents.concat(BALSwapEvents).sort((a, b) => a.blockNumber - b.blockNumber)}
+              dataSource={ETHSwapEvents.concat(BALSwapEvents).sort((a, b) => b.blockNumber - a.blockNumber)}
               renderItem={item => {
                 if (item.event === "ETHSwap") {
                   return (
@@ -218,7 +218,7 @@ export default function Dex(props) {
             <h3><b>Liquidity</b></h3>
             <List
               className="order-book-list"
-              dataSource={AddLiquidityEvents.concat(WithdrawLiquidityEvents).sort((a, b) => a.blockNumber - b.blockNumber)}
+              dataSource={AddLiquidityEvents.concat(WithdrawLiquidityEvents).sort((a, b) => b.blockNumber - a.blockNumber)}
               renderItem={item => {
                 if (item.event === "AddLiquidity") {
                   return (

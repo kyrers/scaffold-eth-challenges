@@ -21,8 +21,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const dex = await ethers.getContract("DEX", deployer);
 
   console.log("Approving DEX (" + dex.address + ") to take Balloons from main account...");
-  await balloons.approve(dex.address, ethers.utils.parseEther('10'));
-  console.log("Initializing exchange with 10 Ballons and 10 ETH...");
-  await dex.initialize(ethers.utils.parseEther("10"), { value: ethers.utils.parseEther('10'), gasLimit: 200000 })
+  await balloons.approve(dex.address, ethers.utils.parseEther('2'));
+  console.log("Initializing exchange with 2 Ballons and 2 ETH...");
+  await dex.initialize(ethers.utils.parseEther("2"), { value: ethers.utils.parseEther('2'), gasLimit: 200000 })
 };
 module.exports.tags = ["Balloons", "DEX"];
